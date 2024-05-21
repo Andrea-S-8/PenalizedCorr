@@ -39,11 +39,13 @@ pacf(
 \value{
 An object of penalized/sample PACF estimation, which is a list with the following elements:
 \describe{
-\item{\code{acf}}{An array containing the estimated penalized/sample PACF.}
-\item{\code{lag}}{An array containing the lags at which the PACF is estimated.}
-\item{\code{n.used}}{The number of observation in the time series.}
+\item{\code{acf}}{A max.lag x nseries x nseries array containing the estimated penalized acf/pacf.}
+\item{\code{type}}{Character vector returning the type argument requested.}
+\item{\code{n.used}}{Numeric of the number of points used for estimation after na.action has been applied.}
+\item{\code{lag}}{A max.lag x nseries x nseries array containing the lags at which the acf/pacf is estimated.}
 \item{\code{series}}{The name of the time series.}
 \item{\code{snames}}{The series names for a multivariate time series.}
+\item{\code{penalized}}{Logical indicating if the acf/pacf returned is penalized.}
 }
 }
 \description{

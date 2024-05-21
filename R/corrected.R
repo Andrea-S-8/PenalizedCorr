@@ -1,3 +1,39 @@
+######
+#' @title corrected
+#'
+#' @description Calculated the corrected (partial) autocorrelation function
+#' @param x a univariate numeric time series.
+#' @param lag.max maximum lag at which to calculate the penalized/sample PACF. Defaults to \eqn{10log_{10}(N)} where N is the number of non-missing observations.
+#' @param type 'character'. "correlation", "covariance" or "partial".
+#' @param na.action function to be called to handle missing values. Default is na.fail, na.pass can be used.
+#' @param demean  'logical'. If 'TRUE' (the default), mean(x) is removed prior to estimation.
+#' @param lh vector of length 1 (value used for all lags), or length lag.max. Default uses formula in the description.
+#' @param ... additional arguments passed to plotting.
+#'
+#' @return An object of type acf with the following elements:
+#' \describe{
+#' \item{\code{acf}}{A max.lag x nseries x nseries array containing the estimated penalized acf/pacf.}
+#' \item{\code{type}}{Character vector returning the type argument requested.}
+#' \item{\code{n.used}}{Numeric of the number of points used for estimation after na.action has been applied.}
+#' \item{\code{lag}}{A max.lag x nseries x nseries array containing the lags at which the acf/pacf is estimated.}
+#' \item{\code{series}}{The name of the time series.}
+#' \item{\code{snames}}{The series names for a multivariate time series.}
+#' \item{\code{penalized}}{Logical indicating if the acf/pacf returned is penalized.}
+#' }
+#'
+#'
+#' @examples
+#' \dontrun{
+#' data <- arima.sim(n=100, model=list(ar=0.5))
+#'
+#' # Example for penalized acf estimation
+#' corrected(data)
+#' }
+#' @importFrom stats na.fail
+#' @importFrom stats as.ts
+#' @importFrom stats toeplitz
+#####
+
 corrected=function(x, lag.max = NULL, type = c("correlation", "covariance", 
           "partial"), na.action = na.fail, demean = TRUE, 
           lh=NULL,...){

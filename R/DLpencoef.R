@@ -17,7 +17,8 @@
 #' DLpencoef(data)
 #' DLpencoef(data, lag.max=10)
 #' }
-#' @export
+#' @importFrom stats as.ts
+#' @importFrom stats na.fail
 #####
 
 DLpencoef <- function(x, lag.max = NULL, na.action=na.fail,penalized=TRUE,lh=NULL,return.mat=FALSE,...){
@@ -25,7 +26,8 @@ DLpencoef <- function(x, lag.max = NULL, na.action=na.fail,penalized=TRUE,lh=NUL
   x <- as.matrix(x)
   if (!is.numeric(x)) 
     stop("'x' must be numeric")
-  sampleT <- as.integer(nrow(x))
+  sampleT <- nrow(x)
+  nser=ncol(x)
   
   if (is.null(lag.max)) 
     lag.max <- floor(10 * (log10(sampleT) - log10(nser)))

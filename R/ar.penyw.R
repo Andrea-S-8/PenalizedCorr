@@ -30,7 +30,12 @@
 #' # Example for penalized ar model fit
 #' ar.penyw(data)
 #' }
-#' @export
+#' @importFrom stats na.fail
+#' @importFrom stats is.ts
+#' @importFrom stats as.ts
+#' @importFrom stats tsp
+#' @importFrom stats frequency
+#' @importFrom stats var
 #####
 
 ar.penyw=function(x, aic = TRUE, order.max = NULL, na.action = na.fail, 

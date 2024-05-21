@@ -31,6 +31,11 @@
 #' ar(data)
 #' }
 #' @export
+#' @importFrom stats na.fail
+#' @importFrom stats ar.yw
+#' @importFrom stats ar.burg
+#' @importFrom stats ar.ols
+#' @importFrom stats ar.mle
 #####
 
 ar <-
