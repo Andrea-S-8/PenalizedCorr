@@ -90,15 +90,20 @@ ar.penyw=function(x, aic = TRUE, order.max = NULL, na.action = na.fail,
     
     penorder <- apply(AICpen,MARGIN=1,FUN=which.min)-1
     pencoef <- lapply(1:nser,FUN=function(i){
+      if(penorder[i]==0){
+        return(NULL)
+      }
       return(DLpencoef(x[, i], lag.max = penorder[i], ...))
     })
   }
   
   var.pred=apply(x,MARGIN=2,FUN=var)* # nser length of variances
     apply(matrix(1:nser,ncol=1),MARGIN=1,FUN=function(j){
+      if(penorder[j]==0){return(1)}
       prod(1-penpacf$acf[1:penorder[j],j,j]^2) # nser length of products
     })
   resid <- apply(matrix(1:nser,ncol=1),MARGIN=1,FUN=function(j){
+    if(penorder[j]==0){return(x[,j])} # independent so resid=data
     x[(penorder[j]+1):sampleT,j] - 
       t(pencoef[[1]])%*%t(apply(matrix(1:penorder[j],ncol=1),MARGIN=1,FUN=function(i){x[(penorder[j]-i+1):(sampleT-i),j]}))
   })

@@ -104,7 +104,6 @@ function (x, lag.max = NULL, type = c("correlation", "covariance",
       if(any(xarorder>3)){
         warning("Approximated AR order is larger than 3 in atleast one of the series. Consider using the penalized direct estimator instead.")
       }
-      
       for(i in 1:nser){ # zero the pacf above the fitted ar lag
         if(xarorder[i]!=lag.max){
           xpacf$acf[(xarorder[i]+1):lag.max,i,i]=0
