@@ -69,6 +69,7 @@ function (x, lag.max = NULL, type = c("correlation", "covariance",
       if(!penalized){ # not penalised so run usual acf
         acf=stats::acf(x,lag.max,type,plot=F,na.action,demean,...)
         acf$penalized=FALSE
+        acf$lh=NULL
       }
       else{ #run penalised estimation
         acf=corrected(x,lag.max,type,na.action,demean,lh,...)
@@ -110,8 +111,12 @@ function (x, lag.max = NULL, type = c("correlation", "covariance",
         }
       }
       
+      
       # Then calculate the AR coefficients for that order
       arcoef=apply(matrix(1:nser,ncol=1),MARGIN=1,FUN=function(i){
+        if(xarorder[i]==0){
+          return(NULL)
+        }
         arcoef=DLpencoef(x[,i], lag.max = xarorder[i], na.action=na.action,penalized=penalized,lh=lh,return.mat=TRUE)
         if(xarorder[i]==1){
           arcoef=matrix(arcoef,nrow=1)
@@ -122,6 +127,10 @@ function (x, lag.max = NULL, type = c("correlation", "covariance",
       # Then convert those into the acf
       acf=acf(x,lag.max=lag.max,type=type,plot=FALSE,na.action=na.action,demean=demean,penalized=penalized,lh=lh)
       xacf=apply(matrix(1:nser,ncol=1),MARGIN=1,FUN=function(i){
+        if(xarorder[i]==0){ # Independence so no AR terms
+          xacf=rep(0,lag.max)
+          return(xacf)
+        }
         xacf=xpacf$acf[,i,i] #initialize
         if(lag.max<=1){
           return(xacf)

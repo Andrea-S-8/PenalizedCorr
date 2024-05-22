@@ -191,5 +191,6 @@ corrected=function(x, lag.max = NULL, type = c("correlation", "covariance",
       acf$acf[-1,i,i]=acfstar[,i]
     }
   }
+  acf$lh=lh
   return(acf)
 }
