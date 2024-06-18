@@ -75,6 +75,7 @@ function (x, lag.max = NULL, type = c("correlation", "covariance",
         acf=corrected(x,lag.max,type,na.action,demean,lh,...)
         acf$penalized=TRUE
       }
+      acf$estimate="direct"
     }
     else if(estimate=="invertpacf"){
       x <- na.action(as.ts(x))
@@ -85,6 +86,14 @@ function (x, lag.max = NULL, type = c("correlation", "covariance",
       nser=ncol(x)
       if (is.null(lag.max)) 
         lag.max <- floor(10 * (log10(sampleT) - log10(nser)))
+      if(is.matrix(lh)){
+        if(dim(lh)[1]!=lag.max){
+          stop("lh is a matrix with the incorrect dimension, must have nrow(lh)=lag.max.")
+        }
+        else if(dim(lh)[2]!=nser){
+          stop("lh is a matrix with the incorrect dimension, must have ncol(lh)=nser.")
+        }
+      }
       
       # First get the approximate AR order by AIC
       xpacf=pacf(x,lag.max=lag.max,plot=F,na.action=na.action,penalized=penalized,lh=lh)
@@ -102,7 +111,7 @@ function (x, lag.max = NULL, type = c("correlation", "covariance",
       
       xarorder <- apply(AICpen,MARGIN=1,FUN=which.min)-1
       if(any(xarorder>3)){
-        warning("Approximated AR order is larger than 3 in atleast one of the series. Consider using the penalized direct estimator instead.")
+        warning("Approximated AR order is larger than 3 in atleast one of the series. Returning the penalized direct estimator instead.")
       }
       for(i in 1:nser){ # zero the pacf above the fitted ar lag
         if(xarorder[i]!=lag.max){
@@ -116,7 +125,12 @@ function (x, lag.max = NULL, type = c("correlation", "covariance",
         if(xarorder[i]==0){
           return(NULL)
         }
-        arcoef=DLpencoef(x[,i], lag.max = xarorder[i], na.action=na.action,penalized=penalized,lh=lh,return.mat=TRUE)
+        if(is.matrix(lh)){
+          arcoef=DLpencoef(x[,i], lag.max = xarorder[i], na.action=na.action,penalized=penalized,lh=lh[,i],return.mat=TRUE)
+        }
+        else{
+          arcoef=DLpencoef(x[,i], lag.max = xarorder[i], na.action=na.action,penalized=penalized,lh=lh,return.mat=TRUE)
+        }
         if(xarorder[i]==1){
           arcoef=matrix(arcoef,nrow=1)
         }
@@ -155,8 +169,8 @@ function (x, lag.max = NULL, type = c("correlation", "covariance",
         acf$acf[-1,i,i]=xacf[,i]
       }
       acf$penalized=penalized
-      return(acf)
-    }
+      acf$estimate="invertpacf"
+     }
     else{stop("The estimate argument can only take values 'direct' or 'invertpacf'.")}
 
     if(plot){

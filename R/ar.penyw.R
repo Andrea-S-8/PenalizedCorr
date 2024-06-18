@@ -107,6 +107,7 @@ ar.penyw=function(x, aic = TRUE, order.max = NULL, na.action = na.fail,
     x[(penorder[j]+1):sampleT,j] - 
       t(pencoef[[1]])%*%t(apply(matrix(1:penorder[j],ncol=1),MARGIN=1,FUN=function(i){x[(penorder[j]-i+1):(sampleT-i),j]}))
   })
+  if(nser==1){pencoef=pencoef[[1]]} # so the print for AR works.
   
   res <- list(order = penorder, ar = pencoef, var.pred = var.pred, 
               x.mean = drop(xm), aic = AICpen, n.used = sampleT, n.obs = n.obs, 

@@ -50,12 +50,6 @@ corrected=function(x, lag.max = NULL, type = c("correlation", "covariance",
   h=1:lag.max
   k=max(lag.max,floor(sqrt(sampleT)))
   
-  if(is.null(lh)){
-    lh=sqrt(log(sampleT)/sampleT)*(k-1+h)/k
-  }
-  if(length(lh)==1){lh=rep(lh,lag.max)}
-  if(length(lh)!=lag.max){stop("lh must either be NULL, length 1, or length lag.max")}
-  
   # if pacf then the next line does pacf anyway
   acf=stats::acf(x,lag.max=k,type,plot=F,na.action,demean,...)
   if(type=="partial"){
@@ -64,6 +58,7 @@ corrected=function(x, lag.max = NULL, type = c("correlation", "covariance",
   else{
     tmpacf=acf$acf[2:(lag.max+1),,]
   } # need to take a copy so we can remove the lag0 when we do acf and it matches with pacf
+  
   if(nser==1){
     tmpacf=array(tmpacf,dim=c(lag.max,1,1))
   }
@@ -71,19 +66,32 @@ corrected=function(x, lag.max = NULL, type = c("correlation", "covariance",
     tmpacf=array(tmpacf,dim=c(1,nser,nser))
   }
   
+  if(is.null(lh)){
+    lh=apply(matrix(1:nser,ncol=1),MARGIN=1,FUN=function(i){
+      el=sqrt(log(sampleT)/(sampleT)*(1-tmpacf[,i,i]^2))*((k-1+h)/k)
+      if(lag.max>1){el=(var((tmpacf[,i,i]))/mean(tmpacf[,i,i]^2))*el}
+      return(el)
+    }) # lh is a matrix lag.max x nser
+  }
+  if(length(lh)==1){lh=matrix(rep(lh,lag.max*nser),nrow=lag.max)}
+  if(length(lh)==lag.max){lh=matrix(rep(lh,nser),nrow=lag.max)}
+  if(any(dim(lh)!=c(lag.max,nser))){
+    stop("lh must either be NULL, length 1, length lag.max or a matrix with dimension lag.max x nser.")
+  }
+  
   nserIndexM=matrix(1:nser,ncol=1)
   # bias correction calculation
   j=1:sqrt(acf$n.used)
   if(type=="partial"){
     b=apply(nserIndexM,MARGIN=1,FUN=function(i){
-      b=((h+1)*(tmpacf[,i,i]-sign(tmpacf[,i,i])*lh)+(tmpacf[,i,i]+1+h%%2==0))/sampleT
+      b=tmpacf[,i,i]+((h+1)*tmpacf[,i,i]+(tmpacf[,i,i]+1+h%%2==0))/sampleT
       return(b)
     }) # returns lag.max x nser matrix
   }
   else{
     b=apply(nserIndexM,MARGIN=1,FUN=function(i){
-      b=((h+1)*(tmpacf[,i,i]-sign(tmpacf[,i,i])*lh) + 
-           (1-tmpacf[,i,i])*(1+2*sum((1-j/sampleT)*acf$acf[j+1,i,i])))/sampleT # +1 as the acf starts at lag0
+      b=tmpacf[,i,i]+((h+1)*tmpacf[,i,i] + 
+            (1-tmpacf[,i,i])*(1+2*sum((1-j/sampleT)*acf$acf[j+1,i,i])))/sampleT # +1 as the acf starts at lag0
       return(b)
     }) # returns lag.max x nser matrix
   }
@@ -96,8 +104,8 @@ corrected=function(x, lag.max = NULL, type = c("correlation", "covariance",
   
   # bias correct if larger than lh, otherwise shrink
   target=apply(nserIndexM,MARGIN=1,FUN=function(i){
-    ind=(abs(tmpacf[,i,i])>lh)
-    target=(tmpacf[,i,i]+b[,i])*ind+(tmpacf[,i,i]*abs(tmpacf[,i,i])/lh)*!ind
+    ind=(abs(b[,i])>lh[,i])
+    target=b[,i]*ind
     return(target)
   }) # lag.max x nser
   if(nser==1){
@@ -108,10 +116,8 @@ corrected=function(x, lag.max = NULL, type = c("correlation", "covariance",
   }
   
   lambda=apply(nserIndexM,MARGIN=1,FUN=function(i){
-    ind=(abs(tmpacf[,i,i])>lh)
-    a=(lh/tmpacf[,i,i]^2)*!ind 
-    b=ind*(sqrt(sampleT)*h*(abs(tmpacf[,i,i])-lh)*(1-lh)/(1-abs(tmpacf[,i,i])))
-    lambda=a+b  # stupid R doesn't add the above two if on the same line ?!?
+    ind=(abs(b[,i])>lh[,i])
+    lambda=(!ind)*h*(lh[,i]-abs(b[,i]))/b[,i]^2+(ind)*h*(abs(b[,i])-lh[,i])*(1-lh[,i])/(1-abs(b[,i]))^2*sqrt(sampleT)
     return(lambda)
   }) # lag.max x nser
 
@@ -137,17 +143,24 @@ corrected=function(x, lag.max = NULL, type = c("correlation", "covariance",
   # check if NND
   if(type!="partial"){
     acfstar=apply(matrix(1:nser,ncol=1),MARGIN=1,FUN=function(i){
-      tx=toeplitz(c(1,acfstar[,i]))
-      ex=min(eigen(tx)$values)
+      gamma=c(1,acfstar[,i])
+      Gamma <- matrix(1, lag.max+1, lag.max+1)
+      d <- row(Gamma) - col(Gamma)
+      for (j in 1:lag.max)
+        Gamma[d == j | d == (-j)] <- gamma[j + 1]
+      # Compute eigenvalue decomposition
+      ei <- eigen(Gamma)
+      # Shrink eigenvalues
+      d <- pmax(ei$values, 10 / sampleT)
+      # Construct new covariance matrix
+      Gamma2 <- ei$vectors %*% diag(d) %*% t(ei$vectors)
+      Gamma2 <- Gamma2 / mean(d)
+      # Estimate new ACF
+      d <- row(Gamma2) - col(Gamma2)
+      for (j in 2:(lag.max+1))
+        gamma[j] <- mean(Gamma2[d == (j - 1)]) 
       
-      if(ex<=0){
-        to=toeplitz(acf$acf[1:(lag.max+1),i,i])
-        eo=min(eigen(to)$values)
-        
-        w=abs(ex)/(eo+abs(ex))
-        tx=w*to + (1-w)*tx
-        acfstar[,i]=tx[-1,1]
-      }
+      acfstar[,i]=gamma[-1]
       return(acfstar[,i])
     })
   }
