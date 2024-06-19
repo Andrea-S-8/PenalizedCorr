@@ -66,6 +66,7 @@ corrected=function(x, lag.max = NULL, type = c("correlation", "covariance",
     tmpacf=array(tmpacf,dim=c(1,nser,nser))
   }
   j=1:floor(sqrt(sampleT))
+  if(type=="partial"){j=j-1}
   if(is.null(lh)){
     lh=apply(matrix(1:nser,ncol=1),MARGIN=1,FUN=function(i){
       el=sqrt(log(sampleT)/(sampleT)*(1-tmpacf[,i,i]^2))*((k-1+h)/k)
@@ -141,27 +142,27 @@ corrected=function(x, lag.max = NULL, type = c("correlation", "covariance",
   
   # check if NND
   if(type!="partial"){
-    acfstar=apply(matrix(1:nser,ncol=1),MARGIN=1,FUN=function(i){
-      gamma=c(1,acfstar[,i])
-      Gamma <- matrix(1, lag.max+1, lag.max+1)
-      d <- row(Gamma) - col(Gamma)
-      for (j in 1:lag.max)
-        Gamma[d == j | d == (-j)] <- gamma[j + 1]
-      # Compute eigenvalue decomposition
-      ei <- eigen(Gamma)
-      # Shrink eigenvalues
-      d <- pmax(ei$values, 10 / sampleT)
-      # Construct new covariance matrix
-      Gamma2 <- ei$vectors %*% diag(d) %*% t(ei$vectors)
-      Gamma2 <- Gamma2 / mean(d)
-      # Estimate new ACF
-      d <- row(Gamma2) - col(Gamma2)
-      for (j in 2:(lag.max+1))
-        gamma[j] <- mean(Gamma2[d == (j - 1)]) 
-      
-      acfstar[,i]=gamma[-1]
-      return(acfstar[,i])
-    })
+      acfstar=apply(matrix(1:nser,ncol=1),MARGIN=1,FUN=function(i){
+        gamma=c(1,acfstar[,i])
+        Gamma <- matrix(1, lag.max+1, lag.max+1)
+        d <- row(Gamma) - col(Gamma)
+        for (j in 1:lag.max)
+          Gamma[d == j | d == (-j)] <- gamma[j + 1]
+        # Compute eigenvalue decomposition
+        ei <- eigen(Gamma)
+        # Shrink eigenvalues
+        d <- pmax(ei$values, 10 / sampleT)
+        # Construct new covariance matrix
+        Gamma2 <- ei$vectors %*% diag(d) %*% t(ei$vectors)
+        Gamma2 <- Gamma2 / mean(d)
+        # Estimate new ACF
+        d <- row(Gamma2) - col(Gamma2)
+        for (j in 2:(lag.max+1))
+          gamma[j] <- mean(Gamma2[d == (j - 1)]) 
+        
+        acfstar[,i]=gamma[-1]
+        return(acfstar[,i])
+      })
   }
   if(nser==1){
     acfstar=matrix(acfstar,nrow=lag.max,ncol=1)

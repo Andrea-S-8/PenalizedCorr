@@ -21,6 +21,8 @@ auto.acf(
 
 \item{lag.max}{maximum lag at which to calculate the penalized/sample ACF/PACF. Defaults to the smaller of \eqn{N-1} and \eqn{10log_{10}(N/nser)} where N is the number of non-missing observations and nser is the number of series.}
 
+\item{order.max}{the maximum AR order to invert, defaults to 2}
+
 \item{plot}{'logical'. If 'TRUE' (the default) the penalized/sample ACF/PACF is plotted.}
 
 \item{na.action}{function to be called to handle missing values. 'na.pass' can be used.}
@@ -29,17 +31,9 @@ auto.acf(
 
 \item{penalized}{'logical'. If 'TRUE' (the default) the penalized ACF/PACF is computed; if 'FALSE' the sample ACF/PACF is computed.}
 
+\item{lh}{sequence of threshold values across h. Could be a single value (repeated for all h), a single vector of length h (repeated for all nser), or a h x nser matrix. Default is data driven.}
+
 \item{...}{additional arguments for specific methods.}
-
-\item{C}{a positive real number for l_h}
-
-\item{type}{type of acf to be computed. Allow values are "correlation" (the default) or "partial".}
-
-\item{print}{'logical'. If 'TRUE' (the default) the penalized/sample ACF/PACF is printed.}
-
-\item{series}{names for the series. Defaults to 'deparse(substitute(x))'.}
-
-\item{estimate}{character vector of the estimation method for the ACF, options are "direct" (default) or "invertpacf".  "invertpacf" is preferred when the data can be approximated by a low order (<3) ARMA model.}
 }
 \value{
 An object of penalized/sample ACF/PACF estimation with the following elements:

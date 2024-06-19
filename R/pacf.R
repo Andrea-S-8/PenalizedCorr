@@ -5,13 +5,11 @@
 #'
 #' @param x a univariate or multivariate numeric time series.
 #' @param lag.max maximum lag at which to calculate the penalized/sample PACF. Defaults to the smaller of \eqn{N-1} and \eqn{10log_{10}(N/nser)} where N is the number of non-missing observations and nser is the number of series.
-#' @param C a positive real number for l_h
-#' @param penalized 'logical'. If 'TRUE' (the default) the penalized PACF is computed; if 'FALSE' the sample PACF is computed.
-#' @param print  'logical'. If 'TRUE' (the default) the penalized/sample PACF is printed.
 #' @param plot  'logical'. If 'TRUE' (the default) the penalized/sample PACF is plotted.
-#' @param series names for the series. Defaults to 'deparse(substitute(x))'.
 #' @param na.action function to be called to handle missing values. 'na.pass' can be used.
 #' @param demean 'logical'. Should a mean be estimated during estimating.
+#' @param penalized 'logical'. If 'TRUE' (the default) the penalized PACF is computed; if 'FALSE' the sample PACF is computed.
+#' @param lh sequence of threshold values across h. Could be a single value (repeated for all h), a single vector of length h (repeated for all nser), or a h x nser matrix. Default is data driven.
 #' @param ... additional arguments for specific methods.
 #'
 #' @return An object of penalized/sample PACF estimation, which is a list with the following elements:

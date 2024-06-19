@@ -4,12 +4,11 @@
 #' @description Fit an autoregressive time series model to the data using penalized correlation estimation, by default selecting the order by AIC.
 #'
 #' @param x a univariate numeric time series.
+#' @param aic 'logical', If 'TRUE' then the Akaike Information Criterion is used to choose the order of the autoregressive model. If FALSE, the model of order order.max is fitted.
 #' @param order.max maximum lag at which to calculate the penalized/sample PACF. Defaults to the smaller of \eqn{N-1} and \eqn{10log_{10}(N/nser)} where N is the number of non-missing observations and nser is the number of series.
-#' @param penalized 'logical'. If 'TRUE' (the default) the penalized autoregressive model is fitted; if 'FALSE' the \code{ar} is fitted and \code{method} can be selected.
-#' @param AIC 'logical', If 'TRUE' then the Akaike Information Criterion is used to choose the order of the autoregressive model. If FALSE, the model of order order.max is fitted.
 #' @param na.action function to be called to handle missing values. 'na.pass' can be used.
-#' @param arprint  'logical'. If 'TRUE' (the default) the fitted penalized ar model is printed.
-#' @param method character string specifying the method to fit the regular autoregressive time series model. Default to "yule-walker".
+#' @param demean 'logical'. Should a mean be estimated during estimating.
+#' @param series names for the series. Defaults to \code{deparse1(substitute(x))}.
 #' @param ... additional arguments for \code{ar} function.
 #'
 #' @return An object of penalized ar model fit with the following elements:

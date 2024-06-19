@@ -28,13 +28,9 @@ pacf(
 
 \item{penalized}{'logical'. If 'TRUE' (the default) the penalized PACF is computed; if 'FALSE' the sample PACF is computed.}
 
+\item{lh}{sequence of threshold values across h. Could be a single value (repeated for all h), a single vector of length h (repeated for all nser), or a h x nser matrix. Default is data driven.}
+
 \item{...}{additional arguments for specific methods.}
-
-\item{C}{a positive real number for l_h}
-
-\item{print}{'logical'. If 'TRUE' (the default) the penalized/sample PACF is printed.}
-
-\item{series}{names for the series. Defaults to 'deparse(substitute(x))'.}
 }
 \value{
 An object of penalized/sample PACF estimation, which is a list with the following elements:

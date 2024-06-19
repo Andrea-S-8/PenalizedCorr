@@ -17,19 +17,17 @@ ar.penyw(
 \arguments{
 \item{x}{a univariate numeric time series.}
 
+\item{aic}{'logical', If 'TRUE' then the Akaike Information Criterion is used to choose the order of the autoregressive model. If FALSE, the model of order order.max is fitted.}
+
 \item{order.max}{maximum lag at which to calculate the penalized/sample PACF. Defaults to the smaller of \eqn{N-1} and \eqn{10log_{10}(N/nser)} where N is the number of non-missing observations and nser is the number of series.}
 
 \item{na.action}{function to be called to handle missing values. 'na.pass' can be used.}
 
+\item{demean}{'logical'. Should a mean be estimated during estimating.}
+
+\item{series}{names for the series. Defaults to \code{deparse1(substitute(x))}.}
+
 \item{...}{additional arguments for \code{ar} function.}
-
-\item{penalized}{'logical'. If 'TRUE' (the default) the penalized autoregressive model is fitted; if 'FALSE' the \code{ar} is fitted and \code{method} can be selected.}
-
-\item{AIC}{'logical', If 'TRUE' then the Akaike Information Criterion is used to choose the order of the autoregressive model. If FALSE, the model of order order.max is fitted.}
-
-\item{arprint}{'logical'. If 'TRUE' (the default) the fitted penalized ar model is printed.}
-
-\item{method}{character string specifying the method to fit the regular autoregressive time series model. Default to "yule-walker".}
 }
 \value{
 An object of penalized ar model fit with the following elements:
