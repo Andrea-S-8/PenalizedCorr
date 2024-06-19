@@ -2,8 +2,8 @@
 
 export(acf)
 export(ar)
-export(pacf)
 export(auto.acf)
+export(pacf)
 importFrom(stats,ar.burg)
 importFrom(stats,ar.mle)
 importFrom(stats,ar.ols)

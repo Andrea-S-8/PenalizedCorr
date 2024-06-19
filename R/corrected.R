@@ -65,11 +65,11 @@ corrected=function(x, lag.max = NULL, type = c("correlation", "covariance",
   else if(lag.max==1){
     tmpacf=array(tmpacf,dim=c(1,nser,nser))
   }
-  
+  j=1:floor(sqrt(sampleT))
   if(is.null(lh)){
     lh=apply(matrix(1:nser,ncol=1),MARGIN=1,FUN=function(i){
       el=sqrt(log(sampleT)/(sampleT)*(1-tmpacf[,i,i]^2))*((k-1+h)/k)
-      if(lag.max>1){el=(var((tmpacf[,i,i]))/mean(tmpacf[,i,i]^2))*el}
+      if(lag.max>1){el=(var((acf$acf[j+1,i,i]))/mean(acf$acf[j+1,i,i]^2))*el}
       return(el)
     }) # lh is a matrix lag.max x nser
   }
@@ -81,7 +81,6 @@ corrected=function(x, lag.max = NULL, type = c("correlation", "covariance",
   
   nserIndexM=matrix(1:nser,ncol=1)
   # bias correction calculation
-  j=1:sqrt(acf$n.used)
   if(type=="partial"){
     b=apply(nserIndexM,MARGIN=1,FUN=function(i){
       b=tmpacf[,i,i]+((h+1)*tmpacf[,i,i]+(tmpacf[,i,i]+1+h%%2==0))/sampleT

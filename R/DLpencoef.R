@@ -5,6 +5,10 @@
 #'
 #' @param x a univariate or multivariate numeric time series.
 #' @param lag.max maximum lag at which to calculate the coefficients. Defaults to the smaller of \eqn{N-1} and \eqn{10log_{10}(N/nser)} where N is the number of non-missing observations and nser is the number of series.
+#' @param na.action function to be called to handle missing values. 'na.pass' can be used.
+#' @param penalized 'logical'. If 'TRUE' (the default) the penalized PACF is computed; if 'FALSE' the sample PACF is computed.
+#' @param lh sequence of threshold values across h. Could be a single value (repeated for all h), a single vector of length h (repeated for all nser), or a h x nser matrix. Default is data driven.
+#' @param return.mat 'logical'. If 'TRUE' the return form is a matrix.  If 'FALSE' the return form is an acf object.
 #' @param ... additional arguments for penalized PACF estimation.
 #'
 #' @return A coefficients vector to estimate a penalized autocorrelation function which is positive definite.
