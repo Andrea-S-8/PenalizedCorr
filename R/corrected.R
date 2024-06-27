@@ -117,7 +117,7 @@ corrected=function(x, lag.max = NULL, type = c("correlation", "covariance",
   
   lambda=apply(nserIndexM,MARGIN=1,FUN=function(i){
     ind=(abs(b[,i])>lh[,i])
-    lambda=(!ind)*h*(lh[,i]-abs(b[,i]))/b[,i]^2+(ind)*h*(abs(b[,i])-lh[,i])*(1-lh[,i])/(1-abs(b[,i]))^2*sqrt(sampleT)
+    lambda=(!ind)*h*lh[,i]*(lh[,i]-abs(b[,i]))/abs(b[,i])^{3}+(ind)*h*(abs(b[,i])-lh[,i])*(1-lh[,i])/(1-abs(b[,i]))^2*sqrt(sampleT)
     return(lambda)
   }) # lag.max x nser
 
@@ -147,7 +147,7 @@ corrected=function(x, lag.max = NULL, type = c("correlation", "covariance",
         Gamma <- toeplitz(gamma)
         # Compute eigenvalue decomposition
         ei <- eigen(Gamma)
-        if(any(ei<=0)){ # original is NND
+        if(any(ei$values<=0)){ # original is NND
           # Shrink eigenvalues
           d <- pmax(ei$values, 10 / sampleT)
           # Construct new covariance matrix
