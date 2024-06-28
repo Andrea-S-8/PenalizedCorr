@@ -85,7 +85,7 @@ corrected=function(x, lag.max = NULL, type = c("correlation", "covariance",
   if(type=="partial"){
     b=apply(nserIndexM,MARGIN=1,FUN=function(i){
       b=tmpacf[,i,i]+((h+1)*tmpacf[,i,i]+(tmpacf[,i,i]+1+h%%2==0))/sampleT
-              b=sign(b)*min(abs(b),0.99)
+              b=sign(b)*pmin(abs(b),0.99)
       return(b)
     }) # returns lag.max x nser matrix
   }
@@ -93,7 +93,7 @@ corrected=function(x, lag.max = NULL, type = c("correlation", "covariance",
     b=apply(nserIndexM,MARGIN=1,FUN=function(i){
       b=tmpacf[,i,i]+((h+1)*tmpacf[,i,i] + 
             (1-tmpacf[,i,i])*(1+2*sum((1-j/sampleT)*acf$acf[j+1,i,i])))/sampleT # +1 as the acf starts at lag0
-              b=sign(b)*min(abs(b),0.99)
+              b=sign(b)*pmin(abs(b),0.99)
       return(b)
     }) # returns lag.max x nser matrix
   }
