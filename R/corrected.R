@@ -46,10 +46,9 @@ corrected=function(x, lag.max = NULL, type = c("correlation", "covariance",
   
   if (is.null(lag.max)) 
     lag.max <- floor(10 * (log10(sampleT) - log10(nser)))
-  
-  h=1:lag.max
+
   k=floor(10 * (log10(sampleT) - log10(nser)))
-  lags=max(lag.max,floor(10*log10(sampleT)),floor(sqrt(sampleT)))
+  lags=max(lag.max,k,floor(sqrt(sampleT)))
     h=1:lags
   # if pacf then the next line does pacf anyway
   acf=stats::acf(x,lag.max=lags,type,plot=F,na.action,demean,...)
@@ -122,7 +121,7 @@ corrected=function(x, lag.max = NULL, type = c("correlation", "covariance",
   
   lambda=apply(nserIndexM,MARGIN=1,FUN=function(i){
     ind=(abs(b[,i])>lh[,i])
-    lambda=(!ind)*h*10*log10(sampleT) *lh[,i]*(lh[,i]-abs(b[,i]))/abs(b[,i])^{3}+(ind)*h*(abs(b[,i])-lh[,i])*(1-lh[,i])/(1-abs(b[,i]))^2*10*log10(sampleT)/h
+    lambda=(!ind)*h*10*log10(sampleT) *lh[,i]*(lh[,i]-abs(b[,i]))/abs(b[,i])^{3}+(ind)*(abs(b[,i])-lh[,i])*(1-lh[,i])/(1-abs(b[,i]))^2*10*log10(sampleT)/h
     return(lambda)
   }) # lags x nser
 
