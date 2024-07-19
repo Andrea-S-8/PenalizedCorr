@@ -72,7 +72,8 @@ corrected=function(x, lag.max = NULL, type = c("correlation", "covariance",
       el = sqrt(log(sampleT)/(sampleT)  * (1 - tmpacf[, i, i]^2))#* (1+2*(h - 1)/k)
             cumrat=function(lag=2,x) return(var(x[1:lag])/mean(x[1:lag]^2))
             v=c(sapply(h[-1],cumrat,x=(tmpacf[,i,i])),var((tmpacf[,i,i]))/mean(tmpacf[,i,i]^2))
-            #el = v*el  #old version var(acf$acf[j,i,i])/mean(acf$acf[j,i,i]^2)*el         
+            el = v*el  #old version 
+              el=var(acf$acf[-1,i,i])/mean(acf$acf[-1,i,i]^2)*el         
             return(el)
     }) # lh is a matrix lag.max x nser
   }
