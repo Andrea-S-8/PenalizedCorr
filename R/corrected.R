@@ -65,7 +65,7 @@ corrected=function(x, lag.max = NULL, type = c("correlation", "covariance",
   else if(lag.max==1){
     tmpacf=array(tmpacf,dim=c(1,nser,nser))
   }
-  j=1:min(floor(sqrt(sampleT)),lag.max)
+  j=1:min(floor(log(sampleT)),lag.max)
   if(type=="partial"){j=j-1}
   if(is.null(lh)){
     lh=apply(matrix(1:nser,ncol=1),MARGIN=1,FUN=function(i){
