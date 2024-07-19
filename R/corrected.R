@@ -121,7 +121,7 @@ corrected=function(x, lag.max = NULL, type = c("correlation", "covariance",
   
   lambda=apply(nserIndexM,MARGIN=1,FUN=function(i){
     ind=(abs(b[,i])>lh[,i])
-    lambda=(!ind)*h*10*log10(sampleT) *lh[,i]*(lh[,i]-abs(b[,i]))/abs(b[,i])^{3}+(ind)*(abs(b[,i])-lh[,i])*(1-lh[,i])/(1-abs(b[,i]))^2*10*log10(sampleT)
+    lambda=(!ind)*h*10*log10(sampleT) *lh[,i]*(lh[,i]-abs(b[,i]))/abs(b[,i])^{3}+(ind)*(abs(b[,i])-lh[,i])*(1-lh[,i])/(1-abs(b[,i]))^2*10*log10(sampleT)*h
     return(lambda)
   }) # lags x nser
 
