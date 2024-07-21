@@ -69,7 +69,7 @@ corrected=function(x, lag.max = NULL, type = c("correlation", "covariance",
   if(type=="partial"){j=j-1}
   if(is.null(lh)){
     lh=apply(matrix(1:nser,ncol=1),MARGIN=1,FUN=function(i){
-      el = sqrt(log(sampleT)/(sampleT)  * (1 - tmpacf[, i, i]^2))*sqrt(k/(k-(1:k)+1))
+      el = sqrt(log(sampleT)/(sampleT)  * (1 - tmpacf[1:k, i, i]^2))*sqrt(k/(k-(1:k)+1))
               if(lags>k) el=c(el,rep(sqrt(k),lags-k))
             cumrat=function(lag=2,x) return(var(x[1:lag])/mean(x[1:lag]^2))
             v=c(sapply(h[-1],cumrat,x=(tmpacf[,i,i])),var((tmpacf[,i,i]))/mean(tmpacf[,i,i]^2))
