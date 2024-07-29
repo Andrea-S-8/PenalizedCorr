@@ -24,10 +24,12 @@
 #'
 #' @examples
 #' \dontrun{
+#' set.seed(1234)
 #' data <- arima.sim(n=100, model=list(ar=0.5))
 #'
-#' # Example for penalized ar model fit
-#' ar(data)
+#' ar(data) # penalized ar model fit
+#' ar(data,method="yw") # default stats::ar() estimate
+#' 
 #' }
 #' @export
 #' @importFrom stats na.fail

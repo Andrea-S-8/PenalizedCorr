@@ -28,23 +28,52 @@
 #'
 #' @examples
 #' \dontrun{
+#' ### AR(1)
+#' set.seed(1234)
 #' data <- arima.sim(n=100, model=list(ar=0.5))
 #'
 #' # Examples for penalized ACF/PACF and sample ACF/PACF
-#' acf(data)
-#' acf(data, penalized = FALSE)
-#' acf(data, type ="partial")
-#' acf(data, type ="partial", penalized = FALSE)
+#' acf(data) # penalized estimate
+#' acf(data, penalized = FALSE) # usual stats::acf() implementation
+#' acf(x,estimate="invertpacf") # estimate the acf by inverting the pacf
+#' acf(data, type ="partial") # penalized partial correlation estimate
+#' acf(data, type ="partial", penalized = FALSE) # usual stats::pacf() estimate
 #'
+#' set.seed(1234)
 #' x1 <- arima.sim(n=100, model=list(ar=0.5))
 #' x2 <- arima.sim(n=100, model=list(ar=0.1))
 #' x3 <- arima.sim(n=100, model=list(ar=0.9))
 #' x <- cbind(x1, x2, x3)
 #'
-#' acf(x)
-#' acf(x, penalized = FALSE)
-#' acf(x, type ="partial")
-#' acf(x, type ="partial", penalized = FALSE)
+#' acf(x) #penalized estimate
+#' acf(x, penalized = FALSE) # usual stats::acf() implementation
+#' acf(x,estimate="invertpacf") # estimate the acf by inverting the pacf
+#' acf(x, type ="partial") # penalized partial correlation estimate
+#' acf(x, type ="partial", penalized = FALSE) # usual stats::pacf() estimate
+#' 
+#' 
+#' ### MA(1)
+#' set.seed(1234)
+#' data <- arima.sim(n=100, model=list(ma=0.7))
+#'
+#' # Examples for penalized ACF/PACF and sample ACF/PACF
+#' acf(data) # penalized estimate
+#' acf(data, penalized = FALSE) # usual stats::acf() implementation
+#' acf(x,estimate="invertpacf") # estimate the acf by inverting the pacf
+#' acf(data, type ="partial") # penalized partial correlation estimate
+#' acf(data, type ="partial", penalized = FALSE) # usual stats::pacf() estimate
+#'
+#' set.seed(1234)
+#' x1 <- arima.sim(n=100, model=list(ma=0.5))
+#' x2 <- arima.sim(n=100, model=list(ma=0.1))
+#' x3 <- arima.sim(n=100, model=list(ma=0.9))
+#' x <- cbind(x1, x2, x3)
+#'
+#' acf(x) #penalized estimate
+#' acf(x, penalized = FALSE) # usual stats::acf() implementation
+#' acf(x,estimate="invertpacf") # estimate the acf by inverting the pacf
+#' acf(x, type ="partial") # penalized partial correlation estimate
+#' acf(x, type ="partial", penalized = FALSE) # usual stats::pacf() estimate
 #' }
 #' @export
 #' @importFrom stats as.ts
@@ -110,6 +139,10 @@ function (x, lag.max = NULL, type = c("correlation", "covariance",
       xarorder <- apply(AICpen,MARGIN=1,FUN=which.min)-1
       if(any(xarorder>3)){
         warning("Approximated AR order is larger than 3 in atleast one of the series. Returning the penalized direct estimator instead.")
+      }
+      if(any(xarorder>lag.max)){
+        warning("Estimated AR order is larger than lag.max.  Increasing lag.max to compensate.")
+        lag.max=max(xarorder)
       }
       for(i in 1:nser){ # zero the pacf above the fitted ar lag
         if(xarorder[i]!=lag.max){

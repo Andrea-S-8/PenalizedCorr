@@ -49,10 +49,38 @@ The Penalized Partial Autocorrelation Function (PACF) Estimation
 }
 \examples{
 \dontrun{
+# AR(1)
+set.seed(1234)
 data <- arima.sim(n=100, model=list(ar=0.5))
 
-# Examples for penalized PACF and sample PACF
-pacf(data)
-pacf(data, penalized = FALSE)
+pacf(data) # penalized estimate
+pacf(data, penalized = FALSE) # standard stats::pacf() estimate
+
+set.seed(1234)
+x1 <- arima.sim(n=100, model=list(ma=0.5))
+x2 <- arima.sim(n=100, model=list(ma=0.1))
+x3 <- arima.sim(n=100, model=list(ma=0.9))
+x <- cbind(x1, x2, x3)
+
+pacf(x) # penalized estimate
+pacf(x, penalized = FALSE) # standard stats::pacf() estimate
+
+# MA(1)
+### MA(1)
+set.seed(1234)
+data <- arima.sim(n=100, model=list(ma=0.7))
+
+pacf(data) # penalized pacf
+pacf(data, penalized = FALSE) # stats::pacf
+
+set.seed(1234)
+x1 <- arima.sim(n=100, model=list(ma=0.5))
+x2 <- arima.sim(n=100, model=list(ma=0.1))
+x3 <- arima.sim(n=100, model=list(ma=0.9))
+x <- cbind(x1, x2, x3)
+
+pacf(x) # penalized pacf
+pacf(x, penalized = FALSE) # stats::pacf
+
 }
 }
