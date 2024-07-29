@@ -48,6 +48,19 @@ jobs:
         with:
           upload-snapshots: true
 
-- name: Coverage
-        if: ${{ matrix.os == 'ubuntu-latest' }}
-        run: ./run.sh coverage
+- name: Test coverage
+        run: |
+          cov <- covr::package_coverage(
+            quiet = FALSE,
+            clean = FALSE,
+            install_path = file.path(normalizePath(Sys.getenv("RUNNER_TEMP"), winslash = "/"), "package")
+          )
+          covr::to_cobertura(cov)
+        shell: Rscript {0}
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          verbose: true
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
