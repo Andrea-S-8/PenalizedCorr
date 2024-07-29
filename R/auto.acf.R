@@ -10,18 +10,20 @@
 #' @param na.action function to be called to handle missing values. 'na.pass' can be used.
 #' @param demean 'logical'. Should a mean be estimated during estimating.
 #' @param penalized 'logical'. If 'TRUE' (the default) the penalized ACF/PACF is computed; if 'FALSE' the sample ACF/PACF is computed.
-#' @param lh sequence of threshold values across h. Could be a single value (repeated for all h), a single vector of length h (repeated for all nser), or a h x nser matrix. Default is data driven.
+#' @param lh sequence of threshold values across h. Could be a single value (repeated for all h), a single vector of length h (repeated for all nser), or a h x nser matrix. Default is NULL and thus data driven.
 #' @param ... additional arguments for specific methods.
 #'
-#' @return An object of penalized/sample ACF/PACF estimation with the following elements:
+#' @return An object of penalized/sample ACF estimation with the following elements:
 #' \describe{
-#' \item{\code{acf}}{A max.lag x nseries x nseries array containing the estimated penalized acf/pacf.}
+#' \item{\code{acf}}{A max.lag x nseries x nseries array containing the estimated penalized acf.}
 #' \item{\code{type}}{Character vector returning the type argument requested.}
 #' \item{\code{n.used}}{Numeric of the number of points used for estimation after na.action has been applied.}
 #' \item{\code{lag}}{A max.lag x nseries x nseries array containing the lags at which the acf/pacf is estimated.}
 #' \item{\code{series}}{The name of the time series.}
 #' \item{\code{snames}}{The series names for a multivariate time series.}
+#' \item{\code{lh}}{The lh used in the estimation for reproducibility.}
 #' \item{\code{penalized}}{Logical indicating if the acf/pacf returned is penalized.}
+#' \item{\code{estimate}}{Type of estimate provided "auto" for reproducibility.}
 #' }
 #'
 #'
