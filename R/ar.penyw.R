@@ -104,7 +104,7 @@ ar.penyw=function(x, aic = TRUE, order.max = NULL, na.action = na.fail,
   resid <- apply(matrix(1:nser,ncol=1),MARGIN=1,FUN=function(j){
     if(penorder[j]==0){return(x[,j])} # independent so resid=data
     x[(penorder[j]+1):sampleT,j] - 
-      t(pencoef[[1]])%*%t(apply(matrix(1:penorder[j],ncol=1),MARGIN=1,FUN=function(i){x[(penorder[j]-i+1):(sampleT-i),j]}))
+      t(pencoef[[j]])%*%t(apply(matrix(1:penorder[j],ncol=1),MARGIN=1,FUN=function(i){x[(penorder[j]-i+1):(sampleT-i),j]}))
   })
   if(nser==1){pencoef=pencoef[[1]]} # so the print for AR works.
   
