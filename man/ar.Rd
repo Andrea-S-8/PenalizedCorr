@@ -47,7 +47,7 @@ series = deparse1(substitute(x)),
 \examples{
 \dontrun{
 set.seed(1234)
-data <- arima.sim(n=100, model=list(ar=0.5))
+data <- arima.sim(n=100, model=list(ar=0.25))
 
 ar(data) # penalized ar model fit
 ar(data,method="yw") # default stats::ar() estimate
