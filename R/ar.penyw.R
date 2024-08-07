@@ -3,11 +3,12 @@
 #'
 #' @description Fit an autoregressive time series model to the data using penalized correlation estimation, by default selecting the order by AIC.
 #'
-#' @param x a univariate numeric time series.
-#' @param aic 'logical', If 'TRUE' then the Akaike Information Criterion is used to choose the order of the autoregressive model. If FALSE, the model of order order.max is fitted.
-#' @param order.max maximum lag at which to calculate the penalized/sample PACF. Defaults to the smaller of \eqn{N-1} and \eqn{10log_{10}(N/nser)} where N is the number of non-missing observations and nser is the number of series.
-#' @param na.action function to be called to handle missing values. 'na.pass' can be used.
-#' @param demean 'logical'. Should a mean be estimated during estimating.
+#' @param x a univariate or multivariate numeric time series.
+#' @param aic logical, If \code{TRUE} then the Akaike Information Criterion is used to choose the order of the autoregressive model. If \code{FALSE}, the model of order \code{order.max} is fitted.
+#' @param order.max maximum order (or order) of model to fit.  Defaults to the smaller of \eqn{N-1} and \eqn{10log_{10}(N/nser)}
+#'  where \eqn{N} is the number of non-missing observations except for \code{method="mle"} where it is the minimum of this quantity and 12.  \code{nser} is the number of series.
+#' @param na.action function to be called to handle missing values. Currently, via \code{na.action=na.pass}, only (penalized) Yule-Walker methods can handle missing values which must be consistent within a time point; either all variables must be missing or none.
+#' @param demean logical. Should a mean be estimated and subtracted before correlations are calculated?
 #' @param series names for the series. Defaults to \code{deparse1(substitute(x))}.
 #' @param ... additional arguments for \code{ar} function.
 #'
@@ -22,6 +23,9 @@
 #' }
 #'
 #'
+#' @references Gallagher, C., Killick, R., Tan, X. (2024+) Penalized M-estimation 
+#' for Autocorrelation. \emph{Submitted.}
+#' 
 #' @examples
 #' \dontrun{
 #' data <- arima.sim(n=100, model=list(ar=0.5))
@@ -29,6 +33,7 @@
 #' # Example for penalized ar model fit
 #' ar.penyw(data)
 #' }
+#' @keywords internal
 #' @importFrom stats na.fail
 #' @importFrom stats is.ts
 #' @importFrom stats as.ts

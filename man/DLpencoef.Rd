@@ -43,3 +43,8 @@ DLpencoef(data)
 DLpencoef(data, lag.max=10)
 }
 }
+\references{
+Gallagher, C., Killick, R., Tan, X. (2024+) Penalized M-estimation 
+for Autocorrelation. \emph{Submitted.}
+}
+\keyword{internal}

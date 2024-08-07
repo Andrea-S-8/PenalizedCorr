@@ -73,3 +73,7 @@ acf(x, type ="partial")
 acf(x, type ="partial", penalized = FALSE)
 }
 }
+\references{
+Gallagher, C., Killick, R., Tan, X. (2024+) Penalized M-estimation 
+for Autocorrelation. \emph{Submitted.}
+}

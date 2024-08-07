@@ -27,6 +27,9 @@
 #' }
 #'
 #'
+#' @references Gallagher, C., Killick, R., Tan, X. (2024+) Penalized M-estimation 
+#' for Autocorrelation. \emph{Submitted.}
+#' 
 #' @examples
 #' \dontrun{
 #' data <- arima.sim(n=100, model=list(ar=0.5))

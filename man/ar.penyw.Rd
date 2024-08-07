@@ -15,15 +15,16 @@ ar.penyw(
 )
 }
 \arguments{
-\item{x}{a univariate numeric time series.}
+\item{x}{a univariate or multivariate numeric time series.}
 
-\item{aic}{'logical', If 'TRUE' then the Akaike Information Criterion is used to choose the order of the autoregressive model. If FALSE, the model of order order.max is fitted.}
+\item{aic}{logical, If \code{TRUE} then the Akaike Information Criterion is used to choose the order of the autoregressive model. If \code{FALSE}, the model of order \code{order.max} is fitted.}
 
-\item{order.max}{maximum lag at which to calculate the penalized/sample PACF. Defaults to the smaller of \eqn{N-1} and \eqn{10log_{10}(N/nser)} where N is the number of non-missing observations and nser is the number of series.}
+\item{order.max}{maximum order (or order) of model to fit.  Defaults to the smaller of \eqn{N-1} and \eqn{10log_{10}(N/nser)}
+where \eqn{N} is the number of non-missing observations except for \code{method="mle"} where it is the minimum of this quantity and 12.  \code{nser} is the number of series.}
 
-\item{na.action}{function to be called to handle missing values. 'na.pass' can be used.}
+\item{na.action}{function to be called to handle missing values. Currently, via \code{na.action=na.pass}, only (penalized) Yule-Walker methods can handle missing values which must be consistent within a time point; either all variables must be missing or none.}
 
-\item{demean}{'logical'. Should a mean be estimated during estimating.}
+\item{demean}{logical. Should a mean be estimated and subtracted before correlations are calculated?}
 
 \item{series}{names for the series. Defaults to \code{deparse1(substitute(x))}.}
 
@@ -51,3 +52,8 @@ data <- arima.sim(n=100, model=list(ar=0.5))
 ar.penyw(data)
 }
 }
+\references{
+Gallagher, C., Killick, R., Tan, X. (2024+) Penalized M-estimation 
+for Autocorrelation. \emph{Submitted.}
+}
+\keyword{internal}

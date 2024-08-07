@@ -2,7 +2,7 @@
 % Please edit documentation in R/acf.R
 \name{acf}
 \alias{acf}
-\title{acf}
+\title{Auto- and Cross- Covariance and -Correlation Function Estimation}
 \usage{
 acf(
   x,
@@ -18,40 +18,62 @@ acf(
 )
 }
 \arguments{
-\item{x}{a univariate or multivariate numeric time series.}
+\item{x}{a univariate or multivariate numeric time series object or a numeric vector or matrix.}
 
-\item{lag.max}{maximum lag at which to calculate the penalized/sample ACF/PACF. Defaults to the smaller of \eqn{N-1} and \eqn{10log_{10}(N/nser)} where N is the number of non-missing observations and nser is the number of series.}
+\item{lag.max}{maximum lag at which to calculate the ACF/PACF. Defaults to the smaller of \eqn{N-1} and \eqn{10log_{10}(N/nser)} where N is the number of non-missing observations and nser is the number of series.}
 
-\item{type}{type of acf to be computed. Allow values are "correlation" (the default) or "partial".}
+\item{type}{character string giving the type of acf to be computed. Allowed values are "correlation" (the default), "covariance" or "partial". Will be partially matched.}
 
-\item{plot}{'logical'. If 'TRUE' (the default) the penalized/sample ACF/PACF is plotted.}
+\item{plot}{logical. If TRUE (the default) the ACF/PACF is plotted.}
 
-\item{na.action}{function to be called to handle missing values. 'na.pass' can be used.}
+\item{na.action}{function to be called to handle missing values. \code{na.pass} can be used.}
 
-\item{demean}{'logical'. Should a mean be estimated during estimating.}
+\item{demean}{logical. Should a mean be estimated and subtracted before correlations are calculated?}
 
-\item{penalized}{'logical'. If 'TRUE' (the default) the penalized ACF/PACF is computed; if 'FALSE' the sample ACF/PACF is computed.}
+\item{penalized}{logical. If \code{TRUE} (the default) the penalized ACF/PACF is computed; if \code{FALSE} the sample ACF/PACF is computed using \code{stats:acf}.}
 
-\item{lh}{sequence of threshold values across h. Could be a single value (repeated for all h), a single vector of length h (repeated for all nser), or a h x nser matrix. Default is data driven.}
+\item{lh}{sequence of threshold values across h, default is \code{NULL}. Could be a single value (repeated for all h), a single vector of length h (repeated for all nser), or a h x nser matrix. Default is data driven choice.}
 
-\item{estimate}{character vector of the estimation method for the ACF, options are "direct" (default) or "invertpacf".  "invertpacf" is preferred when the data can be approximated by a low order (<3) ARMA model.}
+\item{estimate}{character vector of the estimation method for the ACF, options are \code{"direct"} (default) or \code{"invertpacf"}.  \code{"invertpacf"} is preferred when the data can be approximated by a low order AR model.}
 
-\item{...}{additional arguments for specific methods.}
+\item{...}{additional arguments for specific methods or plotting.}
 }
 \value{
-An object of penalized/sample ACF/PACF estimation with the following elements:
+An object of class \code{"acf"} with the following elements:
 \describe{
-\item{\code{acf}}{A max.lag x nseries x nseries array containing the estimated penalized acf/pacf.}
-\item{\code{type}}{Character vector returning the type argument requested.}
-\item{\code{n.used}}{Numeric of the number of points used for estimation after na.action has been applied.}
-\item{\code{lag}}{A max.lag x nseries x nseries array containing the lags at which the acf/pacf is estimated.}
-\item{\code{series}}{The name of the time series.}
+\item{\code{acf}}{A \code{lag.max} x \code{nseries} x \code{nseries} array containing the estimated penalized acf/pacf.}
+\item{\code{type}}{Character vector returning the \code{type} argument.}
+\item{\code{n.used}}{Numeric of the number of points used for estimation after \code{na.action} has been applied.}
+\item{\code{lag}}{A \code{lag.max} x \code{nseries} x \code{nseries} array containing the lags at which the acf/pacf is estimated.}
+\item{\code{series}}{The name of the time series, \code{x}.}
 \item{\code{snames}}{The series names for a multivariate time series.}
-\item{\code{penalized}}{Logical indicating if the acf/pacf returned is penalized.}
+\item{\code{penalized}}{Logical returning the \code{penalized} argument.}
+\item{\code{estimate}}{Character vector returning the \code{estimate} argument.}
 }
 }
 \description{
-The Penalized (Partial) Autocorrelation Function (ACF/PACF) Estimation
+It is well known that the default acf/pacf sample estimates are biased.
+This function provides an updated version of the \code{stats::acf} function with
+default values to calculate the penalized acf/pacf.
+The function acf computes (and by default plots) estimates of the autocovariance 
+or autocorrelation function. Function pacf is the function used for the partial 
+autocorrelations. Function ccf computes the cross-correlation or cross-covariance 
+of two univariate series.
+}
+\details{
+For \code{type = "correlation"} and \code{"covariance"}, if \code{penalized=FALSE} the estimates are based on the sample covariance as in \code{stats::aacf}. (The lag 0 autocorrelation is fixed at 1 by convention.)  It is well known that the 
+sample acf/pacf estimates are biased, using \code{penalized=TRUE} results in an unbiased estimate based on shrinkage towards a target rather than uniformly shrinkage all lags towards zero.  See references for full technical details.
+
+By default, no missing values are allowed. If the \code{na.action} function passes through missing values (as \code{na.pass} does), the covariances are computed from the complete cases. This means that the estimate computed may well not 
+be a valid autocorrelation sequence, and may contain missing values. Missing values are not allowed when computing the PACF of a multivariate time series.
+
+The partial correlation coefficient is estimated by fitting autoregressive models of successively higher orders up to \code{lag.max}.
+
+The generic function \code{plot} has a method for objects of class \code{"acf"}.
+
+The lag is returned and plotted in units of time, and not numbers of observations.
+
+There are \code{print} and subsetting methods for objects of class \code{"acf"}.
 }
 \examples{
 \dontrun{
@@ -102,4 +124,8 @@ acf(x,estimate="invertpacf") # estimate the acf by inverting the pacf
 acf(x, type ="partial") # penalized partial correlation estimate
 acf(x, type ="partial", penalized = FALSE) # usual stats::pacf() estimate
 }
+}
+\references{
+Gallagher, C., Killick, R., Tan, X. (2024+) Penalized M-estimation 
+for Autocorrelation. \emph{Submitted.}
 }
