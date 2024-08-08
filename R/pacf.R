@@ -97,7 +97,16 @@ function (x, lag.max=NULL, plot=TRUE, na.action=na.fail, demean=TRUE,penalized=T
     pacf$penalized=TRUE
   }
   if(plot){
-    plot(pacf, ...)
+    extra.args=list(...)
+    if(any(names(extra.args)=="ylab")){
+      plot(pacf,...)
+    }
+    else if(pacf$penalized==TRUE){
+      plot(pacf,ylab="Penalized ACF",...)
+    }
+    else{ # NOT WORKING!!!!!!
+      plot(pacf,...)
+    }
     invisible(pacf)
   }
   else return(pacf)

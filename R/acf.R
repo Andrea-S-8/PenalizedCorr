@@ -229,8 +229,17 @@ function (x, lag.max = NULL, type = c("correlation", "covariance",
     else{stop("The estimate argument can only take values 'direct' or 'invertpacf'.")}
 
     if(plot){
-      plot(acf, ...)
+      extra.args=list(...)
+      if(any(names(extra.args)=="ylab")){
+        plot(acf,...)
+      }
+      else if(acf$penalized==TRUE){
+        plot(acf,ylab="Penalized ACF",...)
+      }
+      else{
+        plot(acf,...)
+      }
       invisible(acf)
     }
-    else return(acf)
+    else{return(acf)}
 }
