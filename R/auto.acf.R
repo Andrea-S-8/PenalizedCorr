@@ -76,7 +76,7 @@ auto.acf=function(x, lag.max = NULL, order.max=2, plot = TRUE, na.action = na.fa
   }
   
   # First get the approximate AR order by AIC
-  xpacf=pacf(x,lag.max=lag.max,plot=F,na.action=na.action,penalized=penalized,lh=lh)
+  xpacf=pacf(x,lag.max=lag.max,plot=FALSE,na.action=na.action,penalized=penalized,lh=lh)
   AICpen <- apply(matrix(1:lag.max,ncol=1), MARGIN=1,
                   FUN=function(i){
                     sampleT*log(apply(x,MARGIN=2,FUN=var)* # nser length of variances

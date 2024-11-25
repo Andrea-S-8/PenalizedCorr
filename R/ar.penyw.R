@@ -72,14 +72,24 @@ ar.penyw=function(x, aic = TRUE, order.max = NULL, na.action = na.fail,
   else if (order.max >= sampleT)
     stop("'order.max' must be less than 'n'")
   
-
+  spacf=stats::pacf(x,plot=F,lag.max=order.max,na.action=na.action)$acf
+  
   if(!aic){
-    pencoef <- DLpencoef(x, lag.max = order.max, ...)
-    penorder <- order.max
-    AICpen <- NULL
+    pencoef=lapply(1:nser, FUN = function(i) {
+      return(DLpencoef(x[, i], lag.max = order.max,lh=sqrt(log(sampleT)/sampleT)*(1-spacf[,i,i]^2), ...))
+    })
+    AICpen=NULL
+    lhmat=apply(matrix(1:nser,ncol=1),MARGIN=1,FUN=function(i){
+      return(sqrt(log(sampleT)/sampleT)*(1-spacf[,i,i]^2))
+    })
+    penpacf=pacf(x,lag.max=order.max,demean=FALSE,plot=FALSE,lh=lhmat)
   }
   else{
-    penpacf=pacf(x,lag.max=order.max,demean=FALSE,plot=FALSE)
+    lhmat=apply(matrix(1:nser,ncol=1),MARGIN=1,FUN=function(i){
+      return(sqrt(log(sampleT)/sampleT)*(1-spacf[,i,i]^2))
+    })
+    
+    penpacf=pacf(x,lag.max=order.max,demean=FALSE,plot=FALSE,lh=lhmat)
     
     AICpen <- apply(matrix(1:order.max,ncol=1), MARGIN=1,FUN=function(i){
       sampleT*log(apply(x,MARGIN=2,FUN=var)* # nser length of variances
@@ -87,9 +97,7 @@ ar.penyw=function(x, aic = TRUE, order.max = NULL, na.action = na.fail,
                       prod(1-penpacf$acf[1:i,j,j]^2) # nser length of products
                     })) + 2*i
     })
-    if(nser==1){
-      AICpen=matrix(AICpen,nrow=1)
-    }
+    if(nser==1){AICpen=matrix(AICpen,nrow=1)}
     AICpen <- cbind(sampleT * log(apply(x,MARGIN=2,FUN=var)),AICpen)
     
     penorder <- apply(AICpen,MARGIN=1,FUN=which.min)-1
@@ -97,7 +105,8 @@ ar.penyw=function(x, aic = TRUE, order.max = NULL, na.action = na.fail,
       if(penorder[i]==0){
         return(NULL)
       }
-      return(DLpencoef(x[, i], lag.max = penorder[i], ...))
+      return(DLpencoef(x[, i], lag.max = penorder[i], 
+              lh=sqrt(log(sampleT)/sampleT)*(1-spacf[1:penorder[i],i,i]^2),...))
     })
   }
   

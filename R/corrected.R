@@ -43,49 +43,56 @@ corrected=function(x, lag.max = NULL, type = c("correlation", "covariance",
           lh=NULL,...){
   x <- na.action(as.ts(x))
   x <- as.matrix(x)
-  if (!is.numeric(x)) 
-    stop("'x' must be numeric")
+  if (!is.numeric(x)){stop("'x' must be numeric")}
   sampleT <- as.integer(nrow(x))
   nser <- as.integer(ncol(x))
   
-  if (is.null(lag.max)) 
-    lag.max <- floor(10 * (log10(sampleT) - log10(nser)))
+  cov=FALSE
+  if(type=="covariance"){
+    cov=TRUE
+    type=="correlation"
+    # set the flag and proceed as if you wanted to calculate correlation
+  }
+  
+  if(is.null(lag.max)){lag.max <- floor(10 * (log10(sampleT) - log10(nser)))}
 
   k=floor(10 * (log10(sampleT) - log10(nser)))
   lags=max(lag.max,k,floor(sqrt(sampleT)))
-    h=1:lags
+  h=1:lags
+  
   # if pacf then the next line does pacf anyway
-  acf=stats::acf(x,lag.max=lags,type,plot=F,na.action,demean,...)
+  acf=stats::acf(x,lag.max=lags,type=type,plot=FALSE,na.action=na.action,demean=demean,...)
   if(type=="partial"){
-    tmpacf=acf$acf[1:lags,,]
+    tmpacf=acf$acf[1:lags,,,drop=FALSE]
   }# need to take a copy so dimensions are the same as we want the output, original is needed for k lags for bias
   else{
-    tmpacf=acf$acf[2:(lags+1),,]
+    tmpacf=acf$acf[2:(lags+1),,,drop=FALSE]
   } # need to take a copy so we can remove the lag0 when we do acf and it matches with pacf
   
-  if(nser==1){
-    tmpacf=array(tmpacf,dim=c(lags,1,1))
-  }
-  else if(lag.max==1){
-    tmpacf=array(tmpacf,dim=c(1,nser,nser))
-  }
-  j=1:min(floor(log(sampleT)),lag.max)
+  j=1:ceiling(log(sampleT))
   if(type=="partial"){j=j-1}
-  if(is.null(lh)){
-    lh=apply(matrix(1:nser,ncol=1),MARGIN=1,FUN=function(i){
-      el = sqrt(log(sampleT)/(sampleT)  * (1 - tmpacf[1:k, i, i]^2))*sqrt(k/(k-(1:k)+1))
-              if(lags>k) el=c(el,rep(sqrt(k),lags-k))
-            cumrat=function(lag=2,x) return(var(x[1:lag])/mean(x[1:lag]^2))
-            v=c(sapply(h[-1],cumrat,x=(tmpacf[,i,i])),var((tmpacf[,i,i]))/mean(tmpacf[,i,i]^2))
-            el = v*el  #old version  el=var(acf$acf[-1,i,i])/mean(acf$acf[-1,i,i]^2)*el         
-            return(el)
-    }) # lh is a matrix lag.max x nser
+  
+  if(length(lh)==1){lh=matrix(rep(lh,lags*nser),nrow=lags)} # same value for all series and lags
+  else if(length(lh)==lag.max){ # same lh vector for all series
+    lh = matrix(rep(c(lh,rep(lh[lag.max],lags-lag.max)), nser), nrow = lags)
+    # pad to lags with last value, doesn't affect output as curtail to 1:lag.max
   }
-  if(length(lh)==1){lh=matrix(rep(lh,lags*nser),nrow=lags)}
-  #if(length(lh)==lag.max){lh=matrix(rep(lh,nser),nrow=lags)}
-  #if(any(dim(lh)!=c(lag.max,nser))){
-    #stop("lh must either be NULL, length 1, length lag.max or a matrix with dimension lag.max x nser.")
-  #}
+  else if(length(lh)==nser){ # one value per series, repeat for lags
+    lh=matrix(rep(lh,each=lags),nrow=lags)
+  }
+  else if(is.null(lh)){ # none supplied so use default
+    lh=apply(matrix(1:nser,ncol=1),MARGIN=1,FUN=function(i){
+      el = sqrt(log(sampleT)/(sampleT))
+      el=el*sqrt(1-tmpacf[,i,i]^2)
+      return(el)
+    }) # lh is a matrix lags x nser
+  }
+  else if(all(dim(lh)==c(lag.max,nser))){ # given lax.max x nser, want lags x nser, repeat last row
+    lh=rbind(lh,matrix(rep(lh[lag.max,],each=lags-lag.max),nrow=lags-lag.max))
+  }
+  else{ # not something we expect so stop
+    stop("lh must either be NULL, length 1, length lag.max, ncol(x), or a matrix with dimension lag.max x nser.")
+  }
   
   nserIndexM=matrix(1:nser,ncol=1)
   # bias correction calculation
@@ -97,112 +104,83 @@ corrected=function(x, lag.max = NULL, type = c("correlation", "covariance",
     }) # returns lags x nser matrix
   }
   else{
+    # estimate AR order, if "low" then move toward an inverted PACF rather than bias corrected
+    arord=apply(nserIndexM, MARGIN = 1, FUN = function(i) {
+      return(ar.penyw(x[,i])$order)
+    })
+    
     b=apply(nserIndexM,MARGIN=1,FUN=function(i){
-      b=tmpacf[,i,i]+((h+1)*tmpacf[,i,i] + 
-            (1-tmpacf[,i,i])*(1+2*sum((1-j/sampleT)*acf$acf[j+1,i,i])))/sampleT # +1 as the acf starts at lag0
-              b=sign(b)*pmin(abs(b),0.99)
+      if(arord[i]<log(sampleT)*2){ 
+        return(acf(x[,i],plot=FALSE,lag.max=lags,estimate="invertpacf")$acf[-1,i,i])
+      }
+      b=tmpacf[,i,i]+(h*tmpacf[,i,i]+(1-tmpacf[,i,i])*(1+2*sum((1-j/sampleT)*tmpacf[j,i,i])))/sampleT
+      b = sign(b) * pmin(abs(b), 0.99)
       return(b)
     }) # returns lags x nser matrix
+    # still returns a matrix if lags or nser is 1
   }
-  if(nser==1){
-    b=matrix(b,nrow=lags,ncol=1)
-  }
-  else if(lags==1){
-    b=matrix(b,nrow=1,ncol=nser)
-  }
-  
+
   # bias correct if larger than lh, otherwise shrink
   target=apply(nserIndexM,MARGIN=1,FUN=function(i){
-    ind=(abs(b[,i])>lh[,i])
+    ind=(abs(tmpacf[,i,i])>lh[,i])
     target=b[,i]*ind
     return(target)
   }) # lags x nser
-  if(nser==1){
-    target=matrix(target,nrow=lags,ncol=1)
-  }
-  else if(lag.max==1){
-    target=matrix(target,nrow=1,ncol=nser)
-  }
-  
+
   lambda=apply(nserIndexM,MARGIN=1,FUN=function(i){
-    ind=(abs(b[,i])>lh[,i])
-    lambda=(!ind)*h*10*log10(sampleT) *lh[,i]*(lh[,i]-abs(b[,i]))/abs(b[,i])^{3}+(ind)*(abs(b[,i])-lh[,i])*(1-lh[,i])/(1-abs(b[,i]))^2*10*log10(sampleT)*h
+    ind=(abs(tmpacf[,i,i])>lh[,i])
+    lambda=(!ind)*h*10*log10(sampleT) *lh[,i]*(lh[,i]-abs(tmpacf[,i,i]))/abs(tmpacf[,i,i])^{3}+ # shrink more aggressively for larger lags
+      (ind)*(abs(tmpacf[,i,i])-lh[,i])*(1-lh[,i])/(1-abs(tmpacf[,i,i]))^2*10*log10(sampleT) # movement towards target doesn't depend on lag
     return(lambda)
   }) # lags x nser
 
-  weights=lambda/(1+lambda)
-  if(nser==1){
-    weights=matrix(weights,nrow=lags,ncol=1)
-  }
-  else if(lags==1){
-    weights=matrix(weights,nrow=1,ncol=nser)
-  }
-  
+  weights=lambda/(1+lambda) # doesn't drop dimensions
+
   acfstar=apply(nserIndexM,MARGIN=1,FUN=function(i){
     acfstar=(1-weights[,i])*tmpacf[,i,i] + weights[,i]*target[,i]
-            acfstar=acfstar[1:lag.max]
+            acfstar=acfstar[1:lag.max,drop=FALSE] # needed if lag.max=1
     return(acfstar)
-  })
-  if(nser==1){
-    acfstar=matrix(acfstar,nrow=lag.max,ncol=1)
-  }
-  else if(lag.max==1){
-    acfstar=matrix(acfstar,nrow=1,ncol=nser)
+  }) # lag.max x nser
+
+  if(lag.max==1){ # apply returns a vector
+    acfstar=matrix(acfstar,nrow=1)
   }
   
   # check if NND
   if(type!="partial"){
-      acfstar=apply(matrix(1:nser,ncol=1),MARGIN=1,FUN=function(i){
+    acfstar=apply(matrix(1:nser,ncol=1),MARGIN=1,FUN=function(i){
         gamma=c(1,acfstar[,i])
-        Gamma <- toeplitz(gamma)
-        # Compute eigenvalue decomposition
-        ei <- eigen(Gamma)
-        if(any(ei$values<=0)){ # original is NND
-          # Shrink eigenvalues
-          d <- pmax(ei$values, 10 / sampleT)
-          # Construct new covariance matrix
-          Gamma2 <- ei$vectors %*% diag(d) %*% t(ei$vectors)
-          Gamma2 <- Gamma2 / mean(d)
-          # Estimate new ACF
-          d <- row(Gamma2) - col(Gamma2)
-          for (j in 2:(lag.max+1))
-            gamma[j] <- mean(Gamma2[d == (j - 1)]) 
-          
-          acfstar[,i]=gamma[-1]
+        Gamma=toeplitz(gamma)
+        ei=eigen(Gamma)
+        if(any(ei$values<=0)){ # NND
+          if(arord[i]<log(sampleT)*2){ # modeled by a "low" order AR, move towards that
+            rr=b[1:lag.max,i]
+            R=toeplitz(c(1,rr))
+            alpha=min(eigen(R)$values)
+            beta=abs(min(ei$values))
+            cv=beta/(alpha+beta)
+            acfstar[,i]=cv*rr+(1-cv)*acfstar[,i]
+          }
+          else{ # move towards IID 
+            R=diag(rep(1,(lag.max+1)))
+            alpha=min(eigen(R)$values)
+            beta=1.1*abs(min(ei$values))
+            cv=beta/(alpha+beta)
+            acfstar[,i]=(1-cv)*acfstar[,i]
+          }
+          Rfinal=toeplitz(c(1,acfstar[,i]))
         }
         return(acfstar[,i])
-      })
+    }) # lag.max x nser
   }
-  if(nser==1){
-    acfstar=matrix(acfstar,nrow=lag.max,ncol=1)
-  }
-  else if(lag.max==1){
-    acfstar=matrix(acfstar,nrow=1,ncol=nser)
-  }
-  
+
   if(type=="partial"){
-    acf$acf=acf$acf[1:lag.max,,]
-    acf$lag=acf$lag[1:lag.max,,]
-    if(nser==1){
-      acf$acf=array(acf$acf,dim=c(lag.max,1,1))
-      acf$lag=array(acf$lag,dim=c(lag.max,1,1))
-    }
-    else if(lag.max==1){
-      acf$acf=array(acf$acf,dim=c(1,nser,nser))
-      acf$lag=array(acf$lag,dim=c(1,nser,nser))
-    }
+    acf$acf=acf$acf[1:lag.max,,,drop=FALSE]
+    acf$lag=acf$lag[1:lag.max,,,drop=FALSE]
   }
   else{
-    acf$acf=acf$acf[1:(lag.max+1),,]
-    acf$lag=acf$lag[1:(lag.max+1),,]
-    if(nser==1){
-      acf$acf=array(acf$acf,dim=c(lag.max+1,1,1))
-      acf$lag=array(acf$lag,dim=c(lag.max+1,1,1))
-    }
-    else if(lag.max==1){
-      acf$acf=array(acf$acf,dim=c(2,nser,nser))
-      acf$lag=array(acf$lag,dim=c(2,nser,nser))
-    }
+    acf$acf=acf$acf[1:(lag.max+1),,,drop=FALSE]
+    acf$lag=acf$lag[1:(lag.max+1),,,drop=FALSE]
   }
   
   for(i in 1:nser){

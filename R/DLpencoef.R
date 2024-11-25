@@ -40,7 +40,7 @@ DLpencoef <- function(x, lag.max = NULL, na.action=na.fail,penalized=TRUE,lh=NUL
   if (is.null(lag.max)) 
     lag.max <- floor(10 * (log10(sampleT) - log10(nser)))
   
-  penpacf <- pacf(x, lag.max = min(floor(sqrt(sampleT)),lag.max), plot = FALSE, na.action=na.action,penalized=penalized,lh=lh,...)
+  penpacf <- pacf(x, lag.max = lag.max, plot = FALSE, na.action=na.action,penalized=penalized,lh=lh,...)
   coef <- matrix(0,nrow=lag.max, ncol=lag.max)
   coef[1,1] <- penpacf$acf[1]
   if(lag.max == 1){return(coef[1])}

@@ -118,7 +118,7 @@ function (x, lag.max = NULL, type = c("correlation", "covariance",
     }
     if(estimate=="direct"){
       if(!penalized){ # not penalised so run usual acf
-        acf=stats::acf(x,lag.max,type,plot=F,na.action,demean,...)
+        acf=stats::acf(x,lag.max,type,plot=FALSE,na.action,demean,...)
         acf$penalized=FALSE
         acf$lh=NULL
       }
@@ -148,28 +148,10 @@ function (x, lag.max = NULL, type = c("correlation", "covariance",
       
       # First get the approximate AR order by AIC
       xpacf=pacf(x,lag.max=lag.max,plot=F,na.action=na.action,penalized=penalized,lh=lh)
-      AICpen <- apply(matrix(1:lag.max,ncol=1), MARGIN=1,
-                      FUN=function(i){
-                      sampleT*log(apply(x,MARGIN=2,FUN=var)* # nser length of variances
-                      apply(matrix(1:nser,ncol=1),MARGIN=1,FUN=function(j){
-                        prod(1-xpacf$acf[1:i,j,j]^2) # nser length of products
-                      })) + 2*i
-      })
-      if(nser==1){
-        AICpen=matrix(AICpen,nrow=1)
-      }
-      AICpen <- cbind(sampleT * log(apply(x,MARGIN=2,FUN=var)),AICpen)
-      
-      xarorder <- apply(AICpen,MARGIN=1,FUN=which.min)-1
-      if(any(xarorder>3)){
-        warning("Approximated AR order is larger than 3 in atleast one of the series. Returning the penalized direct estimator instead.")
-      }
-      if(any(xarorder>lag.max)){
-        warning("Estimated AR order is larger than lag.max.  Increasing lag.max to compensate.")
-        lag.max=max(xarorder)
-      }
+
+      xarorder <- ar(x,method="penyw",na.action=na.action)$order
       for(i in 1:nser){ # zero the pacf above the fitted ar lag
-        if(xarorder[i]!=lag.max){
+        if(xarorder[i]<lag.max){
           xpacf$acf[(xarorder[i]+1):lag.max,i,i]=0
         }
       }
@@ -193,33 +175,26 @@ function (x, lag.max = NULL, type = c("correlation", "covariance",
       },simplify=FALSE) # list of length nser with each element being xarorder[i] x xarorder[i]
       
       # Then convert those into the acf
-      acf=acf(x,lag.max=lag.max,type=type,plot=FALSE,na.action=na.action,demean=demean,penalized=penalized,lh=lh)
+      acf=stats::acf(x,lag.max=lag.max,type=type,plot=FALSE,na.action=na.action,demean=demean)
       xacf=apply(matrix(1:nser,ncol=1),MARGIN=1,FUN=function(i){
         if(xarorder[i]==0){ # Independence so no AR terms
           xacf=rep(0,lag.max)
           return(xacf)
         }
-        xacf=xpacf$acf[,i,i] #initialize
-        if(lag.max<=1){
-          return(xacf)
-        }
+        xacf=xpacf$acf[,i,i,drop=FALSE] #initialize
         prodacf=cumprod((1-xpacf$acf[1:(lag.max-1),i,i]^2)) * xpacf$acf[2:lag.max,i,i]
-        for(j in 2:min(lag.max,xarorder[i]+1)){
+        if(xarorder[i]!=1){
+          for(j in 2:min(lag.max,xarorder[i])){
           xacf[j]=prodacf[j-1] + arcoef[[i]][1:(j-1),j-1]%*%xacf[(j-1):1]
+          }
         }
-        if(xarorder[i]==lag.max){return(xacf)}
-        for(j in (xarorder[i]+2):lag.max){
+        if((xarorder[i]>=lag.max)){return(xacf)}
+        for(j in (xarorder[i]+1):lag.max){
           xacf[j]=arcoef[[i]][,xarorder[i]]%*%xacf[(j-1):(j-xarorder[i])]
         }
         return(xacf)
       })
-      if(nser==1){
-        xacf=array(xacf,dim=c(lag.max,1))
-      }
-      else if(lag.max==1){
-        xacf=array(xacf,dim=c(1,nser))
-      }
-      
+
       for(i in 1:nser){
         acf$acf[-1,i,i]=xacf[,i]
       }
