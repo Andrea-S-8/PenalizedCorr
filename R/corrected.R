@@ -157,14 +157,14 @@ corrected=function(x, lag.max = NULL, type = c("correlation", "covariance",
             rr=b[1:lag.max,i]
             R=toeplitz(c(1,rr))
             alpha=min(eigen(R)$values)
-            beta=abs(min(ei$values))
+            beta=abs(min(ei$values))*(1+1/sampleT)
             cv=beta/(alpha+beta)
             acfstar[,i]=cv*rr+(1-cv)*acfstar[,i]
           }
           else{ # move towards IID 
             R=diag(rep(1,(lag.max+1)))
             alpha=min(eigen(R)$values)
-            beta=1.1*abs(min(ei$values))
+            beta=abs(min(ei$values))*(1+1/sampleT)
             cv=beta/(alpha+beta)
             acfstar[,i]=(1-cv)*acfstar[,i]
           }
