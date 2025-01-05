@@ -110,7 +110,9 @@ corrected=function(x, lag.max = NULL, type = c("correlation", "covariance",
     })
     
     b=apply(nserIndexM,MARGIN=1,FUN=function(i){
-      if(arord[i]<log(sampleT)*2){ 
+      if(arord[i]<(sampleT)^{1/3}){
+        # if approximated well by a "low" order AR process
+        # using n^{1/3} (had log(n) and log(n)*2 previously), trying to get a balance for larger n as log(n) is too small
         return(acf(x[,i],plot=FALSE,lag.max=lags,estimate="invertpacf")$acf[-1,i,i])
       }
       b=tmpacf[,i,i]+(h*tmpacf[,i,i]+(1-tmpacf[,i,i])*(1+2*sum((1-j/sampleT)*tmpacf[j,i,i])))/sampleT
@@ -153,7 +155,8 @@ corrected=function(x, lag.max = NULL, type = c("correlation", "covariance",
         Gamma=toeplitz(gamma)
         ei=eigen(Gamma)
         if(any(ei$values<=0)){ # NND
-          if(arord[i]<log(sampleT)*2){ # modeled by a "low" order AR, move towards that
+          if(arord[i]<sampleT^{1/3}){ # modeled by a "low" order AR, move towards that
+            # using n^{1/3} (had log(n) and log(n)*2 previously), trying to get a balance for larger n as log(n) is too small
             rr=b[1:lag.max,i]
             R=toeplitz(c(1,rr))
             alpha=min(eigen(R)$values)
