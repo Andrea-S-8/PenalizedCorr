@@ -64,9 +64,8 @@ ar.penyw=function(x, aic = TRUE, order.max = NULL, na.action = na.fail,
   else{xm <- rep.int(0, nser)}
   sampleT <- nrow(x)
   n.obs <- sum(!is.na(x[, 1]))
-  order.max <- if (is.null(order.max)) 
-    min(sampleT - 1L, floor(10 * log10(sampleT)))
-  else floor(order.max)
+  order.max <- ifelse(is.null(order.max),
+        min(sampleT - 1L, floor(10 * log10(sampleT))),floor(order.max))
   if(is.na(order.max) || order.max < 1L)
     stop("'order.max' must be >= 1")
   else if (order.max >= sampleT)
