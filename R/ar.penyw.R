@@ -82,6 +82,7 @@ ar.penyw=function(x, aic = TRUE, order.max = NULL, na.action = na.fail,
       return(sqrt(log(sampleT)/sampleT)*(1-spacf[,i,i]^2))
     })
     penpacf=pacf(x,lag.max=order.max,demean=FALSE,plot=FALSE,lh=lhmat)
+    penorder=rep(order.max,nser)
   }
   else{
     lhmat=apply(matrix(1:nser,ncol=1),MARGIN=1,FUN=function(i){
