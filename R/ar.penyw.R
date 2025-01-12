@@ -103,7 +103,7 @@ ar.penyw=function(x, aic = TRUE, order.max = NULL, na.action = na.fail,
     penorder <- apply(AICpen,MARGIN=1,FUN=which.min)-1
     pencoef <- lapply(1:nser,FUN=function(i){
       if(penorder[i]==0){
-        return(NULL)
+        return(numeric())
       }
       return(DLpencoef(x[, i], lag.max = penorder[i], 
               lh=sqrt(log(sampleT)/sampleT)*(1-spacf[1:penorder[i],i,i]^2),...))
