@@ -127,6 +127,9 @@ ar.penyw=function(x, aic = TRUE, order.max = NULL, na.action = na.fail,
               order.max = order.max, partialacf = penpacf, resid = resid, 
               method = "Penalized Yule-Walker", series = series, frequency = xfreq, 
               call = match.call())
+  if (nser == 1L && order) 
+    res$asy.var.coef <- var.pred/n.obs * solve(toeplitz(drop(xacf)[seq_len(order)]))
+  
   class(res) <- "ar"
   return(res)
 }
