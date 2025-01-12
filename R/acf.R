@@ -149,7 +149,17 @@ function (x, lag.max = NULL, type = c("correlation", "covariance",
       # First get the approximate AR order by AIC
       xpacf=pacf(x,lag.max=lag.max,plot=F,na.action=na.action,penalized=penalized,lh=lh)
 
-      xarorder <- ar(x,method="penyw",na.action=na.action)$order
+      AICpen <- apply(matrix(1:lag.max,ncol=1), MARGIN=1,FUN=function(i){
+        sampleT*log(apply(x,MARGIN=2,FUN=var)* # nser length of variances
+                      apply(matrix(1:nser,ncol=1),MARGIN=1,FUN=function(j){
+                        prod(1-xpacf$acf[1:i,j,j]^2) # nser length of products
+                      })) + 2*i
+      })
+      if(nser==1){AICpen=matrix(AICpen,nrow=1)}
+      AICpen <- cbind(sampleT * log(apply(x,MARGIN=2,FUN=var)),AICpen)
+      
+      xarorder <- apply(AICpen,MARGIN=1,FUN=which.min)-1
+      
       for(i in 1:nser){ # zero the pacf above the fitted ar lag
         if(xarorder[i]<lag.max){
           xpacf$acf[(xarorder[i]+1):lag.max,i,i]=0
