@@ -81,7 +81,7 @@ ar.penyw=function(x, aic = TRUE, order.max = NULL, na.action = na.fail,
     lhmat=apply(matrix(1:nser,ncol=1),MARGIN=1,FUN=function(i){
       return(sqrt(log(sampleT)/sampleT)*(1-spacf[,i,i]^2))
     })
-    penpacf=pacf(x,lag.max=order.max,demean=FALSE,plot=FALSE,lh=lhmat)
+    penpacf=pacf(x,lag.max=order.max,demean=FALSE,plot=FALSE,penalized=TRUE,lh=lhmat)
     penorder=rep(order.max,nser)
   }
   else{
@@ -89,7 +89,7 @@ ar.penyw=function(x, aic = TRUE, order.max = NULL, na.action = na.fail,
       return(sqrt(log(sampleT)/sampleT)*(1-spacf[,i,i]^2))
     })
     
-    penpacf=pacf(x,lag.max=order.max,demean=FALSE,plot=FALSE,lh=lhmat)
+    penpacf=pacf(x,lag.max=order.max,demean=FALSE,plot=FALSE,penalized=TRUE,lh=lhmat)
     
     AICpen <- apply(matrix(1:order.max,ncol=1), MARGIN=1,FUN=function(i){
       sampleT*log(apply(x,MARGIN=2,FUN=var)* # nser length of variances
@@ -128,7 +128,7 @@ ar.penyw=function(x, aic = TRUE, order.max = NULL, na.action = na.fail,
               method = "Penalized Yule-Walker", series = series, frequency = xfreq, 
               call = match.call())
    if (nser == 1L && penorder){
-     xacf=acf(x,lag.max=penorder,type="covariance",estimate="invertpacf",plot=FALSE,na.action=na.action,demean=demean)$acf
+     xacf=invertpacf(x,lag.max=penorder,type="covariance",na.action=na.action,demean=demean,penalized=TRUE,estarorder=FALSE)$acf
      res$asy.var.coef <- var.pred/n.obs * solve(toeplitz(drop(xacf)[seq_len(penorder)]))
    } 
   
