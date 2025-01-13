@@ -109,12 +109,27 @@ acf <-
 function (x, lag.max = NULL, type = c("correlation", "covariance", 
     "partial"), plot = TRUE, na.action = na.fail, demean = TRUE, 
     penalized=TRUE,lh=NULL,estimate="direct",...){
+
     type <- match.arg(type)
+    x <- na.action(as.ts(x))
+    x <- as.matrix(x)
+    if (!is.numeric(x)){stop("'x' must be numeric")}
+    sampleT <- as.integer(nrow(x))
+    nser <- as.integer(ncol(x))
+    
     if (type == "partial") {
         m <- match.call()
         m[[1L]] <- quote(pacf)
         m$type <- NULL
         return(eval(m, parent.frame()))
+    }
+    else if(type=="covariance"){
+      acf=acf(x,lag.max=lag.max,type="correlation",plot=plot,na.action=na.action,
+              demean=demean,penalized=penalized,lh=lh,estimate=estimate,...)
+      for(i in 1:nser){
+        acf$acf[,i,i]=acf$acf[,i,i]*var(x[,i])*(sampleT-1)/sampleT
+      }
+      return(acf)
     }
     if(estimate=="direct"){
       if(!penalized){ # not penalised so run usual acf
@@ -129,7 +144,7 @@ function (x, lag.max = NULL, type = c("correlation", "covariance",
       acf$estimate="direct"
     }
     else if(estimate=="invertpacf"){
-      acf=invertpacf(x,lag.max,type,na.action,demean,lh,...)
+      acf=invertpacf(x,lag.max,type,na.action,demean,penalized,lh,...)
       acf$penalized=penalized
       acf$estimate="invertpacf"
      }

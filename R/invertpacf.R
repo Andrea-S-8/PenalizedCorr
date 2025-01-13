@@ -66,8 +66,8 @@ invertpacf=function(x, lag.max = NULL, type = c("correlation", "covariance", "pa
       return(xacf)
     }
     xacf=xpacf$acf[,i,i,drop=FALSE] #initialize
-    prodacf=cumprod((1-xpacf$acf[1:(lag.max-1),i,i]^2)) * xpacf$acf[2:lag.max,i,i]
     if(xarorder[i]!=1){
+      prodacf=cumprod((1-xpacf$acf[1:(lag.max-1),i,i]^2)) * xpacf$acf[2:lag.max,i,i]
       for(j in 2:min(lag.max,xarorder[i])){
         xacf[j]=prodacf[j-1] + arcoef[[i]][1:(j-1),j-1]%*%xacf[(j-1):1]
       }
@@ -78,6 +78,8 @@ invertpacf=function(x, lag.max = NULL, type = c("correlation", "covariance", "pa
     }
     return(xacf)
   })
+  if(nser==1){xacf=matrix(xacf,ncol=1)}
+  else if(lag.max==1){xacf=matrix(xacf,nrow=1)}
   
   for(i in 1:nser){
     acf$acf[-1,i,i]=xacf[,i]

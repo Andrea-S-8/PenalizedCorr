@@ -41,12 +41,6 @@
 corrected=function(x, lag.max = NULL, type = c("correlation", "covariance", 
           "partial"), na.action = na.fail, demean = TRUE, 
           lh=NULL,...){
-  x <- na.action(as.ts(x))
-  x <- as.matrix(x)
-  if (!is.numeric(x)){stop("'x' must be numeric")}
-  sampleT <- as.integer(nrow(x))
-  nser <- as.integer(ncol(x))
-  
   cov=FALSE
   if(type=="covariance"){
     cov=TRUE
