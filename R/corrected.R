@@ -47,18 +47,13 @@ corrected=function(x, lag.max = NULL, type = c("correlation", "covariance",
     stop("'x' must be numeric")
   sampleT=nrow(x)
   nser=ncol(x)
+  
   cov=FALSE
   if(type=="covariance"){
     cov=TRUE
     type=="correlation"
     # set the flag and proceed as if you wanted to calculate correlation
   }
-  x <- na.action(as.ts(x))
-    x <- as.matrix(x)
-    if (!is.numeric(x)) 
-        stop("'x' must be numeric")
-    sampleT <- as.integer(nrow(x))
-    nser <- as.integer(ncol(x))
 
   if(is.null(lag.max)){lag.max <- floor(10 * (log10(sampleT) - log10(nser)))}
 
