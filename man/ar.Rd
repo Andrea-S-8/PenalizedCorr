@@ -9,9 +9,9 @@ ar(
   aic = TRUE,
   order.max = NULL,
   method = c("penyw", "yule-walker", "burg", "ols", "mle", "yw"),
-  lh = NULL,
   na.action = na.fail,
   series = deparse1(substitute(x)),
+  lh = NULL,
   ...
 )
 }
@@ -28,6 +28,8 @@ where \eqn{N} is the number of non-missing observations except for \code{method=
 \item{na.action}{function to be called to handle missing values. Currently, via \code{na.action=na.pass}, only (penalized) Yule-Walker methods can handle missing values which must be consistent within a time point; either all variables must be missing or none.}
 
 \item{series}{names for the series. Defaults to \code{deparse1(substitute(x))}.}
+
+\item{lh}{vector of length 1 (value used for all lags), or length lag.max. Default uses formula in the description.}
 
 \item{...}{additional arguments for specific methods.}
 }

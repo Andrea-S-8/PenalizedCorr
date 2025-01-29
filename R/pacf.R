@@ -102,9 +102,9 @@ function (x, lag.max=NULL, plot=TRUE, na.action=na.fail, demean=TRUE,penalized=T
       plot(pacf,...)
     }
     else if(pacf$penalized==TRUE){
-      plot(pacf,ylab="Penalized ACF",...)
+      plot(pacf,ylab="Penalized PACF",...)
     }
-    else{ # NOT WORKING!!!!!!
+    else{
       plot(pacf,...)
     }
     invisible(pacf)

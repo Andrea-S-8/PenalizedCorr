@@ -11,6 +11,7 @@
 #' @param method character string specifying the method to fit the model. Must be one of the strings in the default argument (the first few characters are sufficient).  Default to "penyw".
 #' @param na.action function to be called to handle missing values. Currently, via \code{na.action=na.pass}, only (penalized) Yule-Walker methods can handle missing values which must be consistent within a time point; either all variables must be missing or none.
 #' @param series names for the series. Defaults to \code{deparse1(substitute(x))}.
+#' @param lh vector of length 1 (value used for all lags), or length lag.max. Default uses formula in the description.
 #' @param ... additional arguments for specific methods.
 #'
 #' @details
@@ -66,8 +67,8 @@
 
 ar <-
 function (x, aic = TRUE, order.max = NULL, method = c("penyw","yule-walker", 
-    "burg", "ols", "mle", "yw"), lh=NULL,na.action = na.fail, series = deparse1(substitute(x)), 
-    ...) 
+    "burg", "ols", "mle", "yw"), na.action = na.fail, series = deparse1(substitute(x)), 
+    lh=NULL,...) 
 {
     res <- switch(match.arg(method), penyw = ar.penyw(x,aic=aic,
         order.max=order.max,na.action=na.action,series=series,lh=lh,...), yw=,
