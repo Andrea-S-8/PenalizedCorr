@@ -46,7 +46,7 @@ DLpencoef <- function(x, lag.max = NULL, na.action=na.fail,penalized=TRUE,lh=NUL
   if(lag.max == 1){return(coef[1])}
   for(i in 2:lag.max){
     if(i>sqrt(sampleT)){
-      penpacf <- pacf(x, lag.max = i, plot = FALSE, na.action=na.action, penalized=penalized,lh=lh[1:i],...)
+      penpacf <- pacf(x, lag.max = i, plot = FALSE, na.action=na.action, penalized=penalized,lh=lh[1:i,],...)
     }
     coef[i,i] <- penpacf$acf[i]
     coef[1:(i-1),i] <- coef[1:(i-1),i-1] - penpacf$acf[i] * coef[(i-1):1,i-1]

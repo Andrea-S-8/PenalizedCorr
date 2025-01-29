@@ -9,6 +9,7 @@ ar(
   aic = TRUE,
   order.max = NULL,
   method = c("penyw", "yule-walker", "burg", "ols", "mle", "yw"),
+  lh = NULL,
   na.action = na.fail,
   series = deparse1(substitute(x)),
   ...

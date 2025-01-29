@@ -8,6 +8,7 @@ ar.penyw(
   x,
   aic = TRUE,
   order.max = NULL,
+  lh = NULL,
   na.action = na.fail,
   demean = TRUE,
   series = NULL,

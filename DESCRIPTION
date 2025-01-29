@@ -4,8 +4,8 @@ Title: Penalized Estimation of Acf and Pacf for Time Series
 Version: 1.0
 Date: 2024-07-28
 Authors@R: c(person("Colin", "Gallagher", role="aut"),
-        person("Xiyan", "Tan", role="aut"),
-        person("Rebecca", "Killick", role=c("aut","cre"),email="r.killick@lancs.ac.uk"))
+	person("Rebecca", "Killick", role=c("aut","cre"),email="r.killick@lancs.ac.uk"),
+        person("Xiyan", "Tan", role="aut"))
 Maintainer: Rebecca Killick <r.killick@lancs.ac.uk>
 BugReports: https://github.com/rkillick/PenalizedCorr/issues
 URL: https://github.com/rkillick/PenalizedCorr/

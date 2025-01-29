@@ -7,15 +7,29 @@ invertpacf=function(x, lag.max = NULL, type = c("correlation", "covariance", "pa
     stop("'x' must be numeric")
   sampleT=nrow(x)
   nser=ncol(x)
-  if (is.null(lag.max)) 
+  if (is.null(lag.max)){
     lag.max <- floor(10 * (log10(sampleT) - log10(nser)))
-  if(is.matrix(lh)){
-    if(dim(lh)[1]!=lag.max){
-      stop("lh is a matrix with the incorrect dimension, must have nrow(lh)=lag.max.")
-    }
-    else if(dim(lh)[2]!=nser){
-      stop("lh is a matrix with the incorrect dimension, must have ncol(lh)=nser.")
-    }
+  }
+
+  acf=stats::pacf(x,lag.max=lag.max,plot=FALSE,na.action=na.action,demean=demean,...)
+  tmpacf=acf$acf[1:lag.max,,,drop=FALSE]
+  
+  if(length(lh)==1){lh=matrix(rep(lh,lag.max*nser),nrow=lag.max)} # same value for all series and lags
+  else if(length(lh)==lag.max){ # same lh vector for all series
+    lh = matrix(lh, nrow = lag.max,ncol=nser)
+  }
+  else if(length(lh)==nser){ # one value per series, repeat for lags
+    lh=matrix(rep(lh,each=lag.max),nrow=lag.max)
+  }
+  else if(is.null(lh)){ # none supplied so use default
+    lh=apply(matrix(1:nser,ncol=1),MARGIN=1,FUN=function(i){
+      el = sqrt(log(sampleT)/(sampleT))
+      el=el*sqrt(1-tmpacf[,i,i]^2)
+      return(el)
+    }) # lh is a matrix lag.max x nser
+  }
+  else{ # not something we expect so stop
+    stop("lh must either be NULL, length 1, length lag.max, ncol(x), or a matrix with dimension lag.max x nser.")
   }
   
   # First get the approximate AR order by AIC
@@ -47,10 +61,10 @@ invertpacf=function(x, lag.max = NULL, type = c("correlation", "covariance", "pa
       return(NULL)
     }
     if(is.matrix(lh)){
-      arcoef=DLpencoef(x[,i], lag.max = xarorder[i], na.action=na.action,penalized=penalized,lh=lh[,i],return.mat=TRUE)
+      arcoef=DLpencoef(x[,i], lag.max = xarorder[i], na.action=na.action,penalized=penalized,lh=lh[1:xarorder[i],i],return.mat=TRUE)
     }
     else{
-      arcoef=DLpencoef(x[,i], lag.max = xarorder[i], na.action=na.action,penalized=penalized,lh=lh,return.mat=TRUE)
+      arcoef=DLpencoef(x[,i], lag.max = xarorder[i], na.action=na.action,penalized=penalized,lh=lh[1:xarorder[i]],return.mat=TRUE)
     }
     if(xarorder[i]==1){
       arcoef=matrix(arcoef,nrow=1)

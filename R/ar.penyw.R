@@ -42,7 +42,7 @@
 #' @importFrom stats var
 #####
 
-ar.penyw=function(x, aic = TRUE, order.max = NULL, na.action = na.fail, 
+ar.penyw=function(x, aic = TRUE, order.max = NULL, lh=NULL,na.action = na.fail, 
                   demean = TRUE, series = NULL,...){
   if (is.null(series)) 
     series <- deparse1(substitute(x))
@@ -73,23 +73,34 @@ ar.penyw=function(x, aic = TRUE, order.max = NULL, na.action = na.fail,
   
   spacf=stats::pacf(x,plot=F,lag.max=order.max,na.action=na.action)$acf
   
+  if(length(lh)==1){lh=matrix(rep(lh,order.max*nser),nrow=order.max)} # same value for all series and lags
+  else if(length(lh)==order.max){ # same lh vector for all series
+    lh = matrix(lh, nrow = order.max,ncol=nser)
+  }
+  else if(length(lh)==nser){ # one value per series, repeat for lags
+    lh=matrix(rep(lh,each=order.max),nrow=order.max)
+  }
+  else if(is.null(lh)){ # none supplied so use default
+    lh=apply(matrix(1:nser,ncol=1),MARGIN=1,FUN=function(i){
+      el = sqrt(log(sampleT)/(sampleT))
+      el=el*sqrt(1-spacf[,i,i]^2)
+      return(el)
+    }) # lh is a matrix order.max x nser
+  }
+  else{ # not something we expect so stop
+    stop("lh must either be NULL, length 1, length order.max, ncol(x), or a matrix with dimension order.max x nser.")
+  }
+  
   if(!aic){
     pencoef=lapply(1:nser, FUN = function(i) {
-      return(DLpencoef(x[, i], lag.max = order.max,lh=sqrt(log(sampleT)/sampleT)*(1-spacf[,i,i]^2), ...))
+      return(DLpencoef(x[, i], lag.max = order.max,lh=lh[,i],...))
     })
     AICpen=NULL
-    lhmat=apply(matrix(1:nser,ncol=1),MARGIN=1,FUN=function(i){
-      return(sqrt(log(sampleT)/sampleT)*(1-spacf[,i,i]^2))
-    })
-    penpacf=pacf(x,lag.max=order.max,demean=FALSE,plot=FALSE,penalized=TRUE,lh=lhmat)
+    penpacf=pacf(x,lag.max=order.max,demean=FALSE,plot=FALSE,penalized=TRUE,lh=lh)
     penorder=rep(order.max,nser)
   }
   else{
-    lhmat=apply(matrix(1:nser,ncol=1),MARGIN=1,FUN=function(i){
-      return(sqrt(log(sampleT)/sampleT)*(1-spacf[,i,i]^2))
-    })
-    
-    penpacf=pacf(x,lag.max=order.max,demean=FALSE,plot=FALSE,penalized=TRUE,lh=lhmat)
+    penpacf=pacf(x,lag.max=order.max,demean=FALSE,plot=FALSE,penalized=TRUE,lh=lh)
     
     AICpen <- apply(matrix(1:order.max,ncol=1), MARGIN=1,FUN=function(i){
       sampleT*log(apply(x,MARGIN=2,FUN=var)* # nser length of variances
@@ -106,7 +117,7 @@ ar.penyw=function(x, aic = TRUE, order.max = NULL, na.action = na.fail,
         return(numeric())
       }
       return(DLpencoef(x[, i], lag.max = penorder[i], 
-              lh=sqrt(log(sampleT)/sampleT)*(1-spacf[1:penorder[i],i,i]^2),...))
+              lh=lh[1:penorder[i],i],...))
     })
   }
   
@@ -128,7 +139,7 @@ ar.penyw=function(x, aic = TRUE, order.max = NULL, na.action = na.fail,
               method = "Penalized Yule-Walker", series = series, frequency = xfreq, 
               call = match.call())
    if (nser == 1L && penorder){
-     xacf=invertpacf(x,lag.max=penorder,type="covariance",na.action=na.action,demean=demean,penalized=TRUE,estarorder=FALSE)$acf
+     xacf=invertpacf(x,lag.max=penorder,type="covariance",lh=lh[1:penorder,],na.action=na.action,demean=demean,penalized=TRUE,estarorder=FALSE)$acf
      res$asy.var.coef <- var.pred/n.obs * solve(toeplitz(drop(xacf)[seq_len(penorder)]))
    } 
   

@@ -66,11 +66,11 @@
 
 ar <-
 function (x, aic = TRUE, order.max = NULL, method = c("penyw","yule-walker", 
-    "burg", "ols", "mle", "yw"), na.action = na.fail, series = deparse1(substitute(x)), 
+    "burg", "ols", "mle", "yw"), lh=NULL,na.action = na.fail, series = deparse1(substitute(x)), 
     ...) 
 {
     res <- switch(match.arg(method), penyw = ar.penyw(x,aic=aic,
-        order.max=order.max,na.action=na.action,series=series,...), yw=,
+        order.max=order.max,na.action=na.action,series=series,lh=lh,...), yw=,
         `yule-walker` = ar.yw(x, 
         aic = aic, order.max = order.max, na.action = na.action, 
         series = series, ...), burg = ar.burg(x, aic = aic, order.max = order.max, 
