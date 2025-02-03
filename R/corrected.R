@@ -57,7 +57,6 @@ corrected=function(x, lag.max = NULL, type = c("correlation", "covariance",
 
   if(is.null(lag.max)){lag.max <- floor(10 * (log10(sampleT) - log10(nser)))}
 
-  k=floor(10 * (log10(sampleT) - log10(nser)))
   h=1:lag.max
   
   # if pacf then the next line does pacf anyway
