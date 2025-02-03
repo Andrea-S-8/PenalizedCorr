@@ -144,7 +144,8 @@ function (x, lag.max = NULL, type = c("correlation", "covariance",
       acf$estimate="direct"
     }
     else if(estimate=="invertpacf"){
-      acf=invertpacf(x,lag.max,type,na.action,demean,penalized,lh,...)
+      acf=invertpacf(x=x,lag.max=lag.max,type=type,na.action=na.action,
+                     demean=demean,penalized=penalized,lh=lh,...)
       acf$penalized=penalized
       acf$estimate="invertpacf"
      }

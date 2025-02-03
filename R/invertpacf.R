@@ -61,10 +61,12 @@ invertpacf=function(x, lag.max = NULL, type = c("correlation", "covariance", "pa
       return(NULL)
     }
     if(is.matrix(lh)){
-      arcoef=DLpencoef(x[,i], lag.max = xarorder[i], na.action=na.action,penalized=penalized,lh=lh[1:xarorder[i],i],return.mat=TRUE)
+      arcoef=PenalizedCorr:::DLpencoef(x[,i], lag.max = xarorder[i], na.action=na.action,
+                  penalized=penalized,lh=matrix(lh[1:xarorder[i],i],ncol=1),return.mat=TRUE)
     }
     else{
-      arcoef=DLpencoef(x[,i], lag.max = xarorder[i], na.action=na.action,penalized=penalized,lh=lh[1:xarorder[i]],return.mat=TRUE)
+      arcoef=PenalizedCorr:::DLpencoef(x[,i],lag.max = xarorder[i],na.action=na.action,
+                  penalized=penalized,lh=matrix(lh[1:xarorder[i]],ncol=1),return.mat=TRUE)
     }
     if(xarorder[i]==1){
       arcoef=matrix(arcoef,nrow=1)

@@ -93,7 +93,7 @@ ar.penyw=function(x, aic = TRUE, order.max = NULL, lh=NULL,na.action = na.fail,
   
   if(!aic){
     pencoef=lapply(1:nser, FUN = function(i) {
-      return(DLpencoef(x[, i], lag.max = order.max,lh=lh[,i],...))
+      return(DLpencoef(x[, i], lag.max = order.max,lh=matrix(lh[,i],ncol=1),...))
     })
     AICpen=NULL
     penpacf=pacf(x,lag.max=order.max,demean=FALSE,plot=FALSE,penalized=TRUE,lh=lh)
@@ -117,7 +117,7 @@ ar.penyw=function(x, aic = TRUE, order.max = NULL, lh=NULL,na.action = na.fail,
         return(numeric())
       }
       return(DLpencoef(x[, i], lag.max = penorder[i], 
-              lh=lh[1:penorder[i],i],...))
+              lh=matrix(lh[1:penorder[i],i],ncol=1),...))
     })
   }
   
@@ -139,7 +139,7 @@ ar.penyw=function(x, aic = TRUE, order.max = NULL, lh=NULL,na.action = na.fail,
               method = "Penalized Yule-Walker", series = series, frequency = xfreq, 
               call = match.call())
    if (nser == 1L && penorder){
-     xacf=invertpacf(x,lag.max=penorder,type="covariance",lh=lh[1:penorder,],na.action=na.action,demean=demean,penalized=TRUE,estarorder=FALSE)$acf
+     xacf=invertpacf(x,lag.max=penorder,type="covariance",lh=matrix(lh[1:penorder,1],ncol=1),na.action=na.action,demean=demean,penalized=TRUE,estarorder=FALSE)$acf
      res$asy.var.coef <- var.pred/n.obs * solve(toeplitz(drop(xacf)[seq_len(penorder)]))
    } 
   
