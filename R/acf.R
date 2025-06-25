@@ -114,6 +114,7 @@ function (x, lag.max = NULL, type = c("correlation", "covariance",
     x <- na.action(as.ts(x))
     x <- as.matrix(x)
     if (!is.numeric(x)){stop("'x' must be numeric")}
+    if(!is.logical(penalized)){stop("penalized must be logical")}
     sampleT <- as.integer(nrow(x))
     nser <- as.integer(ncol(x))
     
