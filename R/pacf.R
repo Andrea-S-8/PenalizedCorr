@@ -88,6 +88,7 @@
 
 pacf <-
 function (x, lag.max=NULL, plot=TRUE, na.action=na.fail, demean=TRUE,penalized=TRUE,lh=NULL,...){
+  if(!is.logical(penalized)){stop("penalized must be logical")}
   if(!penalized){ # not penalised so use standard pacf
     pacf=stats::pacf(x,lag.max,plot,na.action,...)
     pacf$penalized=FALSE
