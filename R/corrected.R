@@ -40,7 +40,18 @@
 
 corrected=function(x, lag.max = NULL, type = c("correlation", "covariance", 
           "partial"), na.action = na.fail, demean = TRUE, 
-          lh=NULL,...){
+          lh=NULL,  
+          target=apply(nserIndexM,MARGIN=1,FUN=function(i){
+            ind=(abs(tmpacf[,i,i])>lh[,i])
+            target=b[,i]*ind
+            return(target)
+          }),
+          lambda=apply(nserIndexM,MARGIN=1,FUN=function(i){
+            ind=(abs(tmpacf[,i,i])>lh[,i])
+            lambda=(!ind)*h*10*log10(sampleT) *lh[,i]*(lh[,i]-abs(tmpacf[,i,i]))/abs(tmpacf[,i,i])^{3}+ # shrink more aggressively for larger lags
+              (ind)*(abs(tmpacf[,i,i])-lh[,i])*(1-lh[,i])/(1-abs(tmpacf[,i,i]))^2*10*log10(sampleT) # movement towards target doesn't depend on lag
+            return(lambda)
+          }),...){
   x <- na.action(as.ts(x))
   x <- as.matrix(x)
   if (!is.numeric(x)) 
@@ -120,20 +131,67 @@ corrected=function(x, lag.max = NULL, type = c("correlation", "covariance",
   else if(nser==1){b=matrix(b,ncol=1)}
   
   # bias correct if larger than lh, otherwise shrink
-  target=apply(nserIndexM,MARGIN=1,FUN=function(i){
-    ind=(abs(tmpacf[,i,i])>lh[,i])
-    target=b[,i]*ind
-    return(target)
-  }) # lag.max x nser
-  if(lag.max==1){target=matrix(target,nrow=1)}
-  else if(nser==1){target=matrix(target,ncol=1)}
   
-  lambda=apply(nserIndexM,MARGIN=1,FUN=function(i){
-    ind=(abs(tmpacf[,i,i])>lh[,i])
-    lambda=(!ind)*h*10*log10(sampleT) *lh[,i]*(lh[,i]-abs(tmpacf[,i,i]))/abs(tmpacf[,i,i])^{3}+ # shrink more aggressively for larger lags
-      (ind)*(abs(tmpacf[,i,i])-lh[,i])*(1-lh[,i])/(1-abs(tmpacf[,i,i]))^2*10*log10(sampleT) # movement towards target doesn't depend on lag
-    return(lambda)
-  }) # lag.max x nser
+  sampleT <- as.integer(nrow(x))
+  nser <- as.integer(ncol(x))
+  
+  if(!is.numeric(lambda)){stop("'lambda must be numeric")}
+  if(!lambda > 0){stop("'lambda' must be positive")}
+  if(length(lambda)==1){lambda=matrix(rep(lambda,lag.max*nser),nrow=lag.max)} # same value for all series and lags
+  else if(length(lambda)==lag.max){ # same lambda vector for all series
+    lambda = matrix(lambda, nrow = lag.max,ncol=nser)
+  }
+  else if(length(lambda)==nser){ # one value per series, repeat for lags
+    lambda=matrix(rep(lambda,each=lag.max),nrow=lag.max)
+  }
+  else if(is.null(lambda)){ # none supplied so use default
+    lambda = apply(nserIndexM,MARGIN=1,FUN=function(i){
+      ind=(abs(tmpacf[,i,i])>lh[,i])
+      lambda=(!ind)*h*10*log10(sampleT) *lh[,i]*(lh[,i]-abs(tmpacf[,i,i]))/abs(tmpacf[,i,i])^{3}+ # shrink more aggressively for larger lags
+        (ind)*(abs(tmpacf[,i,i])-lh[,i])*(1-lh[,i])/(1-abs(tmpacf[,i,i]))^2*10*log10(sampleT) # movement towards target doesn't depend on lag
+      return(lambda)
+    }) # lambda is a matrix lag.max x nser
+  }
+  else{ # not something we expect so stop
+    stop("lambda must either be NULL, length 1, length lag.max, ncol(x), or a matrix with dimension lag.max x nser.")
+  }
+  
+  
+  if(!is.numeric(target)){stop("'target' must be numeric")}
+  if(!target < 1){stop("'target' must be between 1 and -1")}
+  else if(!target > (-1)){stop("'target' must be between 1 and -1")}
+  if(length(target)==1){target=matrix(rep(target,lag.max*nser),nrow=lag.max)} # same value for all series and lags
+  else if(length(target)==lag.max){ # same target vector for all series
+    target = matrix(target, nrow = lag.max,ncol=nser)
+  }
+  else if(length(target)==nser){ # one value per series, repeat for lags
+    target=matrix(rep(target,each=lag.max),nrow=lag.max)
+  }
+  else if(is.null(target)){ # none supplied so use default
+    target = apply(nserIndexM,MARGIN=1,FUN=function(i){
+      ind=(abs(tmpacf[,i,i])>lh[,i])
+      target=b[,i]*ind 
+      return(target)
+    }) # lambda is a matrix lag.max x nser
+  }
+  else{ # not something we expect so stop
+    stop("target must either be NULL, length 1, length lag.max, ncol(x), or a matrix with dimension lag.max x nser.")
+  }
+  
+#  target=apply(nserIndexM,MARGIN=1,FUN=function(i){
+#    ind=(abs(tmpacf[,i,i])>lh[,i])
+#    target=b[,i]*ind
+#    return(target)
+#  })  lag.max x nser
+#  if(lag.max==1){target=matrix(target,nrow=1)}
+#  else if(nser==1){target=matrix(target,ncol=1)}
+  
+#  lambda=apply(nserIndexM,MARGIN=1,FUN=function(i){
+#    ind=(abs(tmpacf[,i,i])>lh[,i])
+#    lambda=(!ind)*h*10*log10(sampleT) *lh[,i]*(lh[,i]-abs(tmpacf[,i,i]))/abs(tmpacf[,i,i])^{3}+ # shrink more aggressively for larger lags
+#      (ind)*(abs(tmpacf[,i,i])-lh[,i])*(1-lh[,i])/(1-abs(tmpacf[,i,i]))^2*10*log10(sampleT) # movement towards target doesn't depend on lag
+#    return(lambda)
+#  })  lag.max x nser
   if(lag.max==1){lambda=matrix(lambda,nrow=1)}
   else if(nser==1){lambda=matrix(lambda,ncol=1)}
   

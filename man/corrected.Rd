@@ -11,6 +11,23 @@ corrected(
   na.action = na.fail,
   demean = TRUE,
   lh = NULL,
+  target = apply(nserIndexM, MARGIN = 1, FUN = function(i) {
+     ind = (abs(tmpacf[, i,
+    i]) > lh[, i])
+     target = b[, i] * ind
+     return(target)
+ }),
+  lambda = apply(nserIndexM, MARGIN = 1, FUN = function(i) {
+     ind = (abs(tmpacf[, i,
+    i]) > lh[, i])
+     lambda = (!ind) * h * 10 * log10(sampleT) * lh[, i] * (lh[, i] -
+    abs(tmpacf[, i, i]))/abs(tmpacf[, i, i])^{
+         3
+     } + (ind) * (abs(tmpacf[,
+    i, i]) - lh[, i]) * (1 - lh[, i])/(1 - abs(tmpacf[, i, i]))^2 * 10 * log10(sampleT)
+ 
+       return(lambda)
+ }),
   ...
 )
 }
