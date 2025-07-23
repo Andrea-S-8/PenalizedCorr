@@ -11,23 +11,8 @@ corrected(
   na.action = na.fail,
   demean = TRUE,
   lh = NULL,
-  target = apply(nserIndexM, MARGIN = 1, FUN = function(i) {
-     ind = (abs(tmpacf[, i,
-    i]) > lh[, i])
-     target = b[, i] * ind
-     return(target)
- }),
-  lambda = apply(nserIndexM, MARGIN = 1, FUN = function(i) {
-     ind = (abs(tmpacf[, i,
-    i]) > lh[, i])
-     lambda = (!ind) * h * 10 * log10(sampleT) * lh[, i] * (lh[, i] -
-    abs(tmpacf[, i, i]))/abs(tmpacf[, i, i])^{
-         3
-     } + (ind) * (abs(tmpacf[,
-    i, i]) - lh[, i]) * (1 - lh[, i])/(1 - abs(tmpacf[, i, i]))^2 * 10 * log10(sampleT)
- 
-       return(lambda)
- }),
+  target = na,
+  lambda = na,
   ...
 )
 }
@@ -43,6 +28,10 @@ corrected(
 \item{demean}{'logical'. If 'TRUE' (the default), mean(x) is removed prior to estimation.}
 
 \item{lh}{vector of length 1 (value used for all lags), or length lag.max. Default uses formula in the description.}
+
+\item{target}{the unbiased (partial) autocorrelation function from a (model) assumption.}
+
+\item{lambda}{}
 
 \item{...}{additional arguments passed to plotting.}
 }

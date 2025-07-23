@@ -23,7 +23,7 @@ DLpencoef(
 
 \item{penalized}{'logical'. If 'TRUE' (the default) the penalized PACF is computed; if 'FALSE' the sample PACF is computed.}
 
-\item{lh}{sequence of threshold values across h. Could be a single value (repeated for all h), a single vector of length h (repeated for all nser), or a h x nser matrix. Default is data driven.}
+\item{lh}{sequence of threshold values across h. Could be a single value (repeated for all h), a single vector of length lag.max (repeated for all nser), or a h x nser matrix. Default is data driven.}
 
 \item{return.mat}{'logical'. If 'TRUE' the return form is a matrix.  If 'FALSE' the return form is an acf object.}
 

@@ -12,23 +12,8 @@ pacf(
   demean = TRUE,
   penalized = TRUE,
   lh = NULL,
-  target = apply(nserIndexM, MARGIN = 1, FUN = function(i) {
-     ind = (abs(tmpacf[, i,
-    i]) > lh[, i])
-     target = b[, i] * ind
-     return(target)
- }),
-  lambda = apply(nserIndexM, MARGIN = 1, FUN = function(i) {
-     ind = (abs(tmpacf[, i,
-    i]) > lh[, i])
-     lambda = (!ind) * h * 10 * log10(sampleT) * lh[, i] * (lh[, i] -
-    abs(tmpacf[, i, i]))/abs(tmpacf[, i, i])^{
-         3
-     } + (ind) * (abs(tmpacf[,
-    i, i]) - lh[, i]) * (1 - lh[, i])/(1 - abs(tmpacf[, i, i]))^2 * 10 * log10(sampleT)
- 
-       return(lambda)
- }),
+  lambda = na,
+  target = na,
   ...
 )
 }
@@ -45,7 +30,11 @@ pacf(
 
 \item{penalized}{logical. If \code{TRUE} (the default) the penalized ACF/PACF is computed; if \code{FALSE} the sample ACF/PACF is computed using \code{stats:acf}.}
 
-\item{lh}{sequence of threshold values across h, default is \code{NULL}. Could be a single value (repeated for all h), a single vector of length h (repeated for all nser), or a h x nser matrix. Default is data driven choice.}
+\item{lh}{sequence of threshold values across h, default is \code{NULL}. Could be a single value (repeated for all h), a single vector of length lag.max (repeated for all nser), or a h x nser matrix. Default is data driven choice.}
+
+\item{lambda}{}
+
+\item{target}{the unbiased (partial) autocorrelation function from a (model) assumption.}
 
 \item{...}{additional arguments for specific methods or plotting.}
 }

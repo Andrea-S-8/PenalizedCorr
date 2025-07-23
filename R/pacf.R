@@ -13,7 +13,9 @@
 #' @param na.action function to be called to handle missing values. \code{na.pass} can be used.
 #' @param demean logical. Should a mean be estimated and subtracted before correlations are calculated?
 #' @param penalized logical. If \code{TRUE} (the default) the penalized ACF/PACF is computed; if \code{FALSE} the sample ACF/PACF is computed using \code{stats:acf}.
-#' @param lh sequence of threshold values across h, default is \code{NULL}. Could be a single value (repeated for all h), a single vector of length h (repeated for all nser), or a h x nser matrix. Default is data driven choice.
+#' @param lh sequence of threshold values across h, default is \code{NULL}. Could be a single value (repeated for all h), a single vector of length lag.max (repeated for all nser), or a h x nser matrix. Default is data driven choice.
+#' @param lambda 
+#' @param target the unbiased (partial) autocorrelation function from a (model) assumption.
 #' @param ... additional arguments for specific methods or plotting.
 #'
 #' @details
@@ -87,18 +89,8 @@
 #####
 
 pacf <-
-function (x, lag.max=NULL, plot=TRUE, na.action=na.fail, demean=TRUE, penalized=TRUE,lh=NULL,
-          target = apply(nserIndexM,MARGIN=1,FUN=function(i){
-            ind=(abs(tmpacf[,i,i])>lh[,i])
-            target=b[,i]*ind 
-            return(target)
-          }), 
-          lambda = apply(nserIndexM,MARGIN=1,FUN=function(i){
-            ind=(abs(tmpacf[,i,i])>lh[,i])
-            lambda=(!ind)*h*10*log10(sampleT) *lh[,i]*(lh[,i]-abs(tmpacf[,i,i]))/abs(tmpacf[,i,i])^{3}+ # shrink more aggressively for larger lags
-              (ind)*(abs(tmpacf[,i,i])-lh[,i])*(1-lh[,i])/(1-abs(tmpacf[,i,i]))^2*10*log10(sampleT) # movement towards target doesn't depend on lag
-            return(lambda)
-          }), ...){
+  function (x, lag.max=NULL, plot=TRUE, na.action=na.fail, demean=TRUE, penalized=TRUE,lh=NULL,
+          lambda = na, target = na,...){
   if(!is.logical(penalized)){stop("penalized must be logical")}
   if(!penalized){ # not penalised so use standard pacf
     pacf=stats::pacf(x,lag.max,plot,na.action,...)
@@ -107,52 +99,6 @@ function (x, lag.max=NULL, plot=TRUE, na.action=na.fail, demean=TRUE, penalized=
   else{ # penalised output
     pacf=corrected(x,lag.max,type="partial",na.action,demean,lh,target,lambda,...)
     pacf$penalized=TRUE
-  }
-  
-  sampleT <- as.integer(nrow(x))
-  nser <- as.integer(ncol(x))
-  
-  if(!is.numeric(lambda)){stop("'lambda must be numeric")}
-  if(!lambda > 0){stop("'lambda' must be positive")}
-  if(length(lambda)==1){lambda=matrix(rep(lambda,lag.max*nser),nrow=lag.max)} # same value for all series and lags
-  else if(length(lambda)==lag.max){ # same lambda vector for all series
-    lambda = matrix(lambda, nrow = lag.max,ncol=nser)
-  }
-  else if(length(lambda)==nser){ # one value per series, repeat for lags
-    lambda=matrix(rep(lambda,each=lag.max),nrow=lag.max)
-  }
-  else if(is.null(lambda)){ # none supplied so use default
-    lambda = apply(nserIndexM,MARGIN=1,FUN=function(i){
-      ind=(abs(tmpacf[,i,i])>lh[,i])
-      lambda=(!ind)*h*10*log10(sampleT) *lh[,i]*(lh[,i]-abs(tmpacf[,i,i]))/abs(tmpacf[,i,i])^{3}+ # shrink more aggressively for larger lags
-        (ind)*(abs(tmpacf[,i,i])-lh[,i])*(1-lh[,i])/(1-abs(tmpacf[,i,i]))^2*10*log10(sampleT) # movement towards target doesn't depend on lag
-      return(lambda)
-    }) # lambda is a matrix lag.max x nser
-  }
-  else{ # not something we expect so stop
-    stop("lambda must either be NULL, length 1, length lag.max, ncol(x), or a matrix with dimension lag.max x nser.")
-  }
-  
-  
-  if(!is.numeric(target)){stop("'target' must be numeric")}
-  if(!target < 1){stop("'target' must be between 1 and -1")}
-  else if(!target > (-1)){stop("'target' must be between 1 and -1")}
-  if(length(target)==1){target=matrix(rep(target,lag.max*nser),nrow=lag.max)} # same value for all series and lags
-  else if(length(target)==lag.max){ # same target vector for all series
-    target = matrix(target, nrow = lag.max,ncol=nser)
-  }
-  else if(length(target)==nser){ # one value per series, repeat for lags
-    target=matrix(rep(target,each=lag.max),nrow=lag.max)
-  }
-  else if(is.null(target)){ # none supplied so use default
-    target = apply(nserIndexM,MARGIN=1,FUN=function(i){
-      ind=(abs(tmpacf[,i,i])>lh[,i])
-      target=b[,i]*ind 
-      return(target)
-    }) # lambda is a matrix lag.max x nser
-  }
-  else{ # not something we expect so stop
-    stop("target must either be NULL, length 1, length lag.max, ncol(x), or a matrix with dimension lag.max x nser.")
   }
   
   if(plot){

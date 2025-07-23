@@ -31,7 +31,7 @@ auto.acf(
 
 \item{penalized}{'logical'. If 'TRUE' (the default) the penalized ACF/PACF is computed; if 'FALSE' the sample ACF/PACF is computed.}
 
-\item{lh}{sequence of threshold values across h. Could be a single value (repeated for all h), a single vector of length h (repeated for all nser), or a h x nser matrix. Default is NULL and thus data driven.}
+\item{lh}{sequence of threshold values across h. Could be a single value (repeated for all h), a single vector of length lag.max (repeated for all nser), or a h x nser matrix. Default is NULL and thus data driven.}
 
 \item{...}{additional arguments for specific methods.}
 }

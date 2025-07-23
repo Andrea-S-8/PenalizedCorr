@@ -8,6 +8,8 @@
 #' @param na.action function to be called to handle missing values. Default is na.fail, na.pass can be used.
 #' @param demean  'logical'. If 'TRUE' (the default), mean(x) is removed prior to estimation.
 #' @param lh vector of length 1 (value used for all lags), or length lag.max. Default uses formula in the description.
+#' @param lambda 
+#' @param target the unbiased (partial) autocorrelation function from a (model) assumption.
 #' @param ... additional arguments passed to plotting.
 #'
 #' @return An object of type acf with the following elements:
@@ -38,20 +40,9 @@
 #' @importFrom stats toeplitz
 #####
 
-corrected=function(x, lag.max = NULL, type = c("correlation", "covariance", 
+corrected = function(x, lag.max = NULL, type = c("correlation", "covariance", 
           "partial"), na.action = na.fail, demean = TRUE, 
-          lh=NULL,  
-          target=apply(nserIndexM,MARGIN=1,FUN=function(i){
-            ind=(abs(tmpacf[,i,i])>lh[,i])
-            target=b[,i]*ind
-            return(target)
-          }),
-          lambda=apply(nserIndexM,MARGIN=1,FUN=function(i){
-            ind=(abs(tmpacf[,i,i])>lh[,i])
-            lambda=(!ind)*h*10*log10(sampleT) *lh[,i]*(lh[,i]-abs(tmpacf[,i,i]))/abs(tmpacf[,i,i])^{3}+ # shrink more aggressively for larger lags
-              (ind)*(abs(tmpacf[,i,i])-lh[,i])*(1-lh[,i])/(1-abs(tmpacf[,i,i]))^2*10*log10(sampleT) # movement towards target doesn't depend on lag
-            return(lambda)
-          }),...){
+          lh = NULL, target = na, lambda = na,...){
   x <- na.action(as.ts(x))
   x <- as.matrix(x)
   if (!is.numeric(x)) 
@@ -135,8 +126,8 @@ corrected=function(x, lag.max = NULL, type = c("correlation", "covariance",
   sampleT <- as.integer(nrow(x))
   nser <- as.integer(ncol(x))
   
-  if(!is.numeric(lambda)){stop("'lambda must be numeric")}
-  if(!lambda > 0){stop("'lambda' must be positive")}
+  if(any(!is.numeric(lambda))){stop("'lambda must be numeric")}
+  if(any(!lambda > 0)){stop("'lambda' must be positive")}
   if(length(lambda)==1){lambda=matrix(rep(lambda,lag.max*nser),nrow=lag.max)} # same value for all series and lags
   else if(length(lambda)==lag.max){ # same lambda vector for all series
     lambda = matrix(lambda, nrow = lag.max,ncol=nser)
@@ -144,7 +135,7 @@ corrected=function(x, lag.max = NULL, type = c("correlation", "covariance",
   else if(length(lambda)==nser){ # one value per series, repeat for lags
     lambda=matrix(rep(lambda,each=lag.max),nrow=lag.max)
   }
-  else if(is.null(lambda)){ # none supplied so use default
+  else if(is.na(lambda)){ # none supplied so use default
     lambda = apply(nserIndexM,MARGIN=1,FUN=function(i){
       ind=(abs(tmpacf[,i,i])>lh[,i])
       lambda=(!ind)*h*10*log10(sampleT) *lh[,i]*(lh[,i]-abs(tmpacf[,i,i]))/abs(tmpacf[,i,i])^{3}+ # shrink more aggressively for larger lags
@@ -152,13 +143,16 @@ corrected=function(x, lag.max = NULL, type = c("correlation", "covariance",
       return(lambda)
     }) # lambda is a matrix lag.max x nser
   }
+  else if(ncol(lambda)!=nser | nrow(lambda)!=lag.max){
+    stop("'lambda' must be a matrix")
+  }
   else{ # not something we expect so stop
     stop("lambda must either be NULL, length 1, length lag.max, ncol(x), or a matrix with dimension lag.max x nser.")
   }
   
   
-  if(!is.numeric(target)){stop("'target' must be numeric")}
-  if(!target < 1){stop("'target' must be between 1 and -1")}
+  if(any(!is.numeric(target))){stop("'target' must be numeric")}
+  if(any(!target < 1)){stop("'target' must be between 1 and -1")}
   else if(!target > (-1)){stop("'target' must be between 1 and -1")}
   if(length(target)==1){target=matrix(rep(target,lag.max*nser),nrow=lag.max)} # same value for all series and lags
   else if(length(target)==lag.max){ # same target vector for all series
@@ -167,17 +161,21 @@ corrected=function(x, lag.max = NULL, type = c("correlation", "covariance",
   else if(length(target)==nser){ # one value per series, repeat for lags
     target=matrix(rep(target,each=lag.max),nrow=lag.max)
   }
-  else if(is.null(target)){ # none supplied so use default
+  else if(is.na(target)){ # none supplied so use default
     target = apply(nserIndexM,MARGIN=1,FUN=function(i){
       ind=(abs(tmpacf[,i,i])>lh[,i])
       target=b[,i]*ind 
       return(target)
-    }) # lambda is a matrix lag.max x nser
+    }) # target is a matrix lag.max x nser
+  }
+  else if(ncol(target)!=nser | nrow(target)!=lag.max){
+    stop("'target' must be a matrix")
   }
   else{ # not something we expect so stop
     stop("target must either be NULL, length 1, length lag.max, ncol(x), or a matrix with dimension lag.max x nser.")
   }
-  
+
+    
 #  target=apply(nserIndexM,MARGIN=1,FUN=function(i){
 #    ind=(abs(tmpacf[,i,i])>lh[,i])
 #    target=b[,i]*ind
@@ -192,8 +190,8 @@ corrected=function(x, lag.max = NULL, type = c("correlation", "covariance",
 #      (ind)*(abs(tmpacf[,i,i])-lh[,i])*(1-lh[,i])/(1-abs(tmpacf[,i,i]))^2*10*log10(sampleT) # movement towards target doesn't depend on lag
 #    return(lambda)
 #  })  lag.max x nser
-  if(lag.max==1){lambda=matrix(lambda,nrow=1)}
-  else if(nser==1){lambda=matrix(lambda,ncol=1)}
+#  if(lag.max==1){lambda=matrix(lambda,nrow=1)}
+#  else if(nser==1){lambda=matrix(lambda,ncol=1)}
   
   weights=lambda/(1+lambda) # doesn't drop dimensions
 
