@@ -42,7 +42,7 @@
 
 corrected = function(x, lag.max = NULL, type = c("correlation", "covariance", 
           "partial"), na.action = na.fail, demean = TRUE, 
-          lh = NULL, target = NULL, lambda = NULL,...){
+          lh = NULL, lambda = NULL, target = NULL,...){
   x <- na.action(as.ts(x))
   x <- as.matrix(x)
   if (!is.numeric(x)) 

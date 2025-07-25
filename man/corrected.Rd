@@ -11,8 +11,8 @@ corrected(
   na.action = na.fail,
   demean = TRUE,
   lh = NULL,
-  target = NULL,
   lambda = NULL,
+  target = NULL,
   ...
 )
 }
@@ -29,9 +29,9 @@ corrected(
 
 \item{lh}{vector of length 1 (value used for all lags), or length lag.max. Default uses formula in the description.}
 
-\item{target}{the unbiased (partial) autocorrelation function from a (model) assumption.}
-
 \item{lambda}{controls the degree of shrinkage towards the target.}
+
+\item{target}{the unbiased (partial) autocorrelation function from a (model) assumption.}
 
 \item{...}{additional arguments passed to plotting.}
 }
