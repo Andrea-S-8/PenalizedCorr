@@ -14,8 +14,8 @@ acf(
   penalized = TRUE,
   lh = NULL,
   estimate = "direct",
-  lambda = na,
-  target = na,
+  lambda = NULL,
+  target = NULL,
   ...
 )
 }
@@ -38,7 +38,7 @@ acf(
 
 \item{estimate}{character vector of the estimation method for the ACF, options are \code{"direct"} (default) or \code{"invertpacf"}.  \code{"invertpacf"} is preferred when the data can be approximated by a low order AR model.}
 
-\item{lambda}{}
+\item{lambda}{controls the degree of shrinkage towards the target.}
 
 \item{target}{the unbiased (partial) autocorrelation function from a (model) assumption.}
 
@@ -93,7 +93,7 @@ acf(data, penalized = FALSE) # usual stats::acf() implementation
 acf(x,estimate="invertpacf") # estimate the acf by inverting the pacf
 acf(data, type ="partial") # penalized partial correlation estimate
 acf(data, type ="partial", penalized = FALSE) # usual stats::pacf() estimate
-acf(data, target = na, lambda = na, lh = NULL)
+
 
 set.seed(1234)
 x1 <- arima.sim(n=100, model=list(ar=0.5))

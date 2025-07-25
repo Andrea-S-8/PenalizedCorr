@@ -11,8 +11,8 @@ corrected(
   na.action = na.fail,
   demean = TRUE,
   lh = NULL,
-  target = na,
-  lambda = na,
+  target = NULL,
+  lambda = NULL,
   ...
 )
 }
@@ -31,7 +31,7 @@ corrected(
 
 \item{target}{the unbiased (partial) autocorrelation function from a (model) assumption.}
 
-\item{lambda}{}
+\item{lambda}{controls the degree of shrinkage towards the target.}
 
 \item{...}{additional arguments passed to plotting.}
 }

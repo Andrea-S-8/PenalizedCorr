@@ -18,7 +18,7 @@
 #' @param penalized logical. If \code{TRUE} (the default) the penalized ACF/PACF is computed; if \code{FALSE} the sample ACF/PACF is computed using \code{stats:acf}.
 #' @param lh sequence of threshold values across h, default is \code{NULL}. Could be a single value (repeated for all h), a single vector of length lag.max (repeated for all nser), or a h x nser matrix. Default is data driven choice.
 #' @param estimate character vector of the estimation method for the ACF, options are \code{"direct"} (default) or \code{"invertpacf"}.  \code{"invertpacf"} is preferred when the data can be approximated by a low order AR model.
-#' @param lambda 
+#' @param lambda controls the degree of shrinkage towards the target.
 #' @param target the unbiased (partial) autocorrelation function from a (model) assumption.
 #' @param ... additional arguments for specific methods or plotting.
 #'
@@ -64,7 +64,7 @@
 #' acf(x,estimate="invertpacf") # estimate the acf by inverting the pacf
 #' acf(data, type ="partial") # penalized partial correlation estimate
 #' acf(data, type ="partial", penalized = FALSE) # usual stats::pacf() estimate
-#' acf(data, target = na, lambda = na, lh = NULL)
+#'
 #'
 #' set.seed(1234)
 #' x1 <- arima.sim(n=100, model=list(ar=0.5))
@@ -111,7 +111,7 @@
 acf <-
   function (x, lag.max = NULL, type = c("correlation", "covariance", "partial"), 
             plot = TRUE, na.action = na.fail, demean = TRUE, penalized=TRUE,
-            lh=NULL, estimate="direct", lambda = na, target = na,...){
+            lh=NULL, estimate="direct", lambda = NULL, target = NULL,...){
      
     type <- match.arg(type)
     x <- na.action(as.ts(x))

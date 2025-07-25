@@ -12,8 +12,8 @@ pacf(
   demean = TRUE,
   penalized = TRUE,
   lh = NULL,
-  lambda = na,
-  target = na,
+  lambda = NULL,
+  target = NULL,
   ...
 )
 }
@@ -32,7 +32,7 @@ pacf(
 
 \item{lh}{sequence of threshold values across h, default is \code{NULL}. Could be a single value (repeated for all h), a single vector of length lag.max (repeated for all nser), or a h x nser matrix. Default is data driven choice.}
 
-\item{lambda}{}
+\item{lambda}{controls the degree of shrinkage towards the target.}
 
 \item{target}{the unbiased (partial) autocorrelation function from a (model) assumption.}
 
