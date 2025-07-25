@@ -97,7 +97,7 @@ pacf <-
     pacf$penalized=FALSE
   }
   else{ # penalised output
-    pacf=corrected(x,lag.max,type="partial",na.action,demean,lh,target,lambda,...)
+    pacf=corrected(x,lag.max,type="partial",na.action,demean,lh,lambda,target,...)
     pacf$penalized=TRUE
   }
   
