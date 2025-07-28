@@ -126,7 +126,7 @@ corrected = function(x, lag.max = NULL, type = c("correlation", "covariance",
   sampleT <- as.integer(nrow(x))
   nser <- as.integer(ncol(x))
   
-  if(any(!is.numeric(lambda))){stop("lambda must be numeric")}
+  if(!(is.numeric(lambda) || is.null(lambda))){stop("lambda must be numeric")}
   if(any(!lambda >= 0)){stop("lambda must be positive")}
   if(length(lambda)==1){lambda=matrix(rep(lambda,lag.max*nser),nrow=lag.max)} # same value for all series and lags
   else if(length(lambda)==lag.max){ # same lambda vector for all series
@@ -151,7 +151,7 @@ corrected = function(x, lag.max = NULL, type = c("correlation", "covariance",
   }
   
   
-  if(any(!is.numeric(target))){stop("target must be numeric")}
+  if(!(is.numeric(target) || is.null(target))){stop("target must be numeric")}
   if(any(!target <= 1)){stop("target must be between 1 and -1")}
   else if(any(!target >= (-1))){stop("target must be between 1 and -1")}
   if(length(target)==1){target=matrix(rep(target,lag.max*nser),nrow=lag.max)} # same value for all series and lags
