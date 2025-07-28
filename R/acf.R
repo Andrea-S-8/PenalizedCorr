@@ -143,7 +143,7 @@ acf <-
         acf$lh=NULL
       }
       else{ #run penalised estimation
-        acf=corrected(x,lag.max,type,na.action,demean,lh,target,lambda, ...)
+        acf=corrected(x,lag.max,type,na.action,demean,lh,lambda,target,...)
         acf$penalized=TRUE
       }
       acf$estimate="direct"
