@@ -135,6 +135,9 @@ corrected = function(x, lag.max = NULL, type = c("correlation", "covariance",
   else if(length(lambda)==nser){ # one value per series, repeat for lags
     lambda=matrix(rep(lambda,each=lag.max),nrow=lag.max)
   }
+  else if(ncol(lambda)!=nser | nrow(lambda)!=lag.max){
+    stop("lambda must be a matrix")
+  }
   else if(is.null(lambda)){ # none supplied so use default
     lambda = apply(nserIndexM,MARGIN=1,FUN=function(i){
       ind = (abs(tmpacf[,i,i])>lh[,i])
@@ -143,12 +146,11 @@ corrected = function(x, lag.max = NULL, type = c("correlation", "covariance",
       return(lambda)
     }) # lambda is a matrix lag.max x nser
   }
-  else if(ncol(lambda)!=nser | nrow(lambda)!=lag.max){
-    stop("lambda must be a matrix")
-  }
   else{ # not something we expect so stop
     stop("lambda must either be NULL, length 1, length lag.max, ncol(x), or a matrix with dimension lag.max x nser.")
   }
+  if(lag.max==1){lambda=matrix(lambda,nrow=1)}
+  else if(nser==1){lambda=matrix(lambda,ncol=1)}
   
   
   if(!(is.numeric(target) || is.null(target))){stop("target must be numeric")}
@@ -161,6 +163,9 @@ corrected = function(x, lag.max = NULL, type = c("correlation", "covariance",
   else if(length(target)==nser){ # one value per series, repeat for lags
     target = matrix(rep(target,each=lag.max),nrow=lag.max)
   }
+  else if(ncol(target)!=nser | nrow(target)!=lag.max){
+    stop("target must be a matrix")
+  }
   else if(is.null(target)){ # none supplied so use default
     target = apply(nserIndexM,MARGIN=1,FUN=function(i){
       ind = (abs(tmpacf[,i,i])>lh[,i])
@@ -168,13 +173,11 @@ corrected = function(x, lag.max = NULL, type = c("correlation", "covariance",
       return(target)
     }) # target is a matrix lag.max x nser
   }
-  else if(ncol(target)!=nser | nrow(target)!=lag.max){
-    stop("target must be a matrix")
-  }
   else{ # not something we expect so stop
     stop("target must either be NULL, length 1, length lag.max, ncol(x), or a matrix with dimension lag.max x nser.")
   }
-
+  if(lag.max==1){target=matrix(target,nrow=1)}
+  else if(nser==1){target=matrix(target,ncol=1)}
     
 #  target=apply(nserIndexM,MARGIN=1,FUN=function(i){
 #    ind=(abs(tmpacf[,i,i])>lh[,i])
@@ -253,3 +256,4 @@ corrected = function(x, lag.max = NULL, type = c("correlation", "covariance",
   acf$lh=lh
   return(acf)
 }
+
