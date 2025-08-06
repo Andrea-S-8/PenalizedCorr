@@ -47,8 +47,9 @@ corrected = function(x, lag.max = NULL, type = c("correlation", "covariance",
   x <- as.matrix(x)
   if (!is.numeric(x)) 
     stop("'x' must be numeric")
-  sampleT=nrow(x)
-  nser=ncol(x)
+  
+  sampleT <- as.integer(nrow(x))
+  nser <- as.integer(ncol(x))
   
   cov=FALSE
   if(type=="covariance"){
@@ -122,9 +123,6 @@ corrected = function(x, lag.max = NULL, type = c("correlation", "covariance",
   else if(nser==1){b=matrix(b,ncol=1)}
   
   # bias correct if larger than lh, otherwise shrink
-  
-  sampleT <- as.integer(nrow(x))
-  nser <- as.integer(ncol(x))
   
   if(!(is.numeric(lambda) || is.null(lambda))){stop("lambda must be numeric")}
   if(any(!lambda >= 0)){stop("lambda must be positive")}
