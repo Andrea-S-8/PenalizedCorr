@@ -133,9 +133,6 @@ corrected = function(x, lag.max = NULL, type = c("correlation", "covariance",
   else if(length(lambda)==nser){ # one value per series, repeat for lags
     lambda=matrix(rep(lambda,each=lag.max),nrow=lag.max)
   }
-  else if(ncol(lambda)!=nser | nrow(lambda)!=lag.max){
-    stop("lambda must be a matrix")
-  }
   else if(is.null(lambda)){ # none supplied so use default
     lambda = apply(nserIndexM,MARGIN=1,FUN=function(i){
       ind = (abs(tmpacf[,i,i])>lh[,i])
@@ -143,6 +140,9 @@ corrected = function(x, lag.max = NULL, type = c("correlation", "covariance",
         (ind)*(abs(tmpacf[,i,i])-lh[,i])*(1-lh[,i])/(1-abs(tmpacf[,i,i]))^2*10*log10(sampleT) # movement towards target doesn't depend on lag
       return(lambda)
     }) # lambda is a matrix lag.max x nser
+  }
+  else if(ncol(lambda)!=nser | nrow(lambda)!=lag.max){
+    stop("lambda must be a matrix")
   }
   else{ # not something we expect so stop
     stop("lambda must either be NULL, length 1, length lag.max, ncol(x), or a matrix with dimension lag.max x nser.")
@@ -161,15 +161,15 @@ corrected = function(x, lag.max = NULL, type = c("correlation", "covariance",
   else if(length(target)==nser){ # one value per series, repeat for lags
     target = matrix(rep(target,each=lag.max),nrow=lag.max)
   }
-  else if(ncol(target)!=nser | nrow(target)!=lag.max){
-    stop("target must be a matrix")
-  }
   else if(is.null(target)){ # none supplied so use default
     target = apply(nserIndexM,MARGIN=1,FUN=function(i){
       ind = (abs(tmpacf[,i,i])>lh[,i])
       target = b[,i]*ind 
       return(target)
     }) # target is a matrix lag.max x nser
+  }
+  else if(ncol(target)!=nser | nrow(target)!=lag.max){
+    stop("target must be a matrix")
   }
   else{ # not something we expect so stop
     stop("target must either be NULL, length 1, length lag.max, ncol(x), or a matrix with dimension lag.max x nser.")
