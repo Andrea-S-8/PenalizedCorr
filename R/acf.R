@@ -154,7 +154,22 @@ acf <-
       acf$penalized=penalized
       acf$estimate="invertpacf"
     }
-    else{stop("The estimate argument can only take values 'direct' or 'invertpacf'.")}
+    else if(estimate=="bandtap" ){
+      acf=stats::acf(x,lag.max=lag.max,type=type,plot=FALSE,na.action=na.action,demean=demean)
+      xacf=apply(matrix(1:nser,ncol=1),MARGIN=1,FUN=function(i){
+      bandtap = bandtap(xacf,n,...)
+      return(bandtap)
+      
+      if(nser==1){xacf=matrix(xacf,ncol=1)}
+      else if(lag.max==1){xacf=matrix(xacf,nrow=1)}
+      
+      for(i in 1:nser){
+        acf$acf[-1,i,i]=xacf[,i]
+      }
+      return(acf)
+      })
+    }
+    else{stop("The estimate argument can only take values 'direct', 'invertpacf' or 'bandtap'.")}
     
     if(plot){
       extra.args=list(...)
